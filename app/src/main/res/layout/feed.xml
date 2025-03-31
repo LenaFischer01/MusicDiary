@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:layout_margin="8dp"
+    >
+
+    <!-- Eigener Beitrag erstellen -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_layout_background"
+        android:padding="8dp"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/spotify_widget"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Your Song"
+            android:background="@drawable/rounded_layout_background"
+            android:padding="8dp"
+            />
+
+
+        <EditText
+            android:id="@+id/editTextPost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Type your post here..."
+            android:maxLines="3" />
+
+
+        <!-- Neue LinearLayout für die Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            >
+
+            <Button
+                android:id="@+id/buttonChooseSong"
+                style="@style/Widget.App.CustomButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Choose Song"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/buttonUploadPost"
+                style="@style/Widget.App.CustomButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Upload Post"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+    <!-- Feed von Freunden
+    -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Friends' Posts"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewFriendsPosts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        />
+
+
+</LinearLayout>
