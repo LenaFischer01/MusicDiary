@@ -1,15 +1,16 @@
-package com.example.musicdiary;
+package com.example.musicdiary.Friends;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.example.musicdiary.Feed.FeedFragment;
-import com.example.musicdiary.Friends.FriendsFragment;
+import com.example.musicdiary.defaultFragment;
 
-public class ViewPageAdapter extends FragmentStateAdapter {
-    public ViewPageAdapter(@NonNull FragmentActivity fragmentActivity) {
+public class ViewPageAdapterFriends extends FragmentStateAdapter {
+    public ViewPageAdapterFriends(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
     }
     @NonNull
@@ -17,11 +18,11 @@ public class ViewPageAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position){
             case 0:
-                return new FeedFragment();
+                return new friendOverviewFragment();
             case 1:
-                return new FriendsFragment();
+                return new friendrequestFragment();
             default:
-                return new FeedFragment();
+                return new defaultFragment();
         }
     }
 

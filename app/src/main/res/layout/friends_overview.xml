@@ -3,20 +3,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    >
 
-    <!-- Abschnitt für Freundesanfragen -->
     <TextView
-        android:id="@+id/textViewFriendRequests"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Open Requests"
+        android:text="Friends"
         android:textStyle="bold"
-        android:layout_marginBottom="8dp" />
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#c0c0c0"
+        android:layout_marginVertical="8dp"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewFriendRequests"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:id="@+id/recyclerViewFriends" />
 
 </LinearLayout>

@@ -12,7 +12,6 @@
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
         app:tabIndicatorColor="@color/white"
         app:tabSelectedTextColor="@color/white"
         android:background="@drawable/rounded_tablayout_background"
@@ -41,10 +40,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <FrameLayout
-        android:id="@+id/fragmentFrameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
 
 </LinearLayout>

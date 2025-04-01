@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 (tab, position) -> {
                     switch (position) {
                         case 0:
-                            tab.setText("Feeed");
+                            tab.setText("Feed");
                             break;
                         case 1:
                             tab.setText("Friends");

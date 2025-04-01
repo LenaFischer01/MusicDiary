@@ -1,4 +1,4 @@
-package com.example.musicdiary;
+package com.example.musicdiary.Feed;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicdiary.Container.FriendObject;
+import com.example.musicdiary.R;
 
 import java.util.List;
 
