@@ -20,6 +20,8 @@ public class ViewPageAdapterFriends extends FragmentStateAdapter {
             case 0:
                 return new friendOverviewFragment();
             case 1:
+                return new friendSearchFragment();
+            case 2:
                 return new friendrequestFragment();
             default:
                 return new defaultFragment();
@@ -28,6 +30,6 @@ public class ViewPageAdapterFriends extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 2;
+        return 3;
     }
 }

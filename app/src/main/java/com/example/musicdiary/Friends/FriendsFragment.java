@@ -46,10 +46,10 @@ public class FriendsFragment extends Fragment {
                             tab.setText("Friends");
                             break;
                         case 1:
-                            tab.setText("Friend requests");
+                            tab.setText("Search friends");
                             break;
                         case 2:
-                            tab.setText("Search friends");
+                            tab.setText("Friend requests");
                             break;
                     }
                 }).attach();
