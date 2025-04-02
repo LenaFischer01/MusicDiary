@@ -67,8 +67,8 @@
             android:text="Friends' Posts"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp" />
+            android:background="@drawable/rounded_layout_background"
+            android:padding="8dp"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewFriendsPosts"

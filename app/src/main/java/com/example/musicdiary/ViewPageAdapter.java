@@ -20,6 +20,8 @@ public class ViewPageAdapter extends FragmentStateAdapter {
                 return new FeedFragment();
             case 1:
                 return new FriendsFragment();
+            case 2:
+                return new SettingsFragment();
             default:
                 return new FeedFragment();
         }
@@ -27,6 +29,6 @@ public class ViewPageAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 2;
+        return 3;
     }
 }

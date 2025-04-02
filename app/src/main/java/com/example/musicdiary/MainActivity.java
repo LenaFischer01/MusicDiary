@@ -44,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
                         case 1:
                             tab.setText("Friends");
                             break;
-
+                        case 2:
+                            tab.setText("Settings");
                     }
                 }).attach();
 
