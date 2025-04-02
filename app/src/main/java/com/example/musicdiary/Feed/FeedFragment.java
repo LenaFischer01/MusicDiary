@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -70,6 +71,8 @@ public class FeedFragment extends Fragment {
         Button uploadButton = (Button) view.findViewById(R.id.buttonUploadPost);
         Button chooseSong = (Button) view.findViewById(R.id.buttonChooseSong);
         EditText input = (EditText) view.findViewById(R.id.editTextPost);
+        Button scrollButton = (Button) view.findViewById(R.id.scrollButtonFeed);
+        NestedScrollView scrollView = (NestedScrollView) view.findViewById(R.id.scrollviewFeed);
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,7 +80,7 @@ public class FeedFragment extends Fragment {
                 // Upload the Post to the DB
                 // Lock button until next day (If entry in DB, not working)
                 if (!uploaded){
-                    if (input.getText().isEmpty()){ // Geht trotzdem, hör auf so dramatisch zu sein
+                    if (input.getText().isEmpty()){ // It's working, stop beeing so dramatic
                         Toast.makeText(getContext(), "You cannot post something empty", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -92,6 +95,14 @@ public class FeedFragment extends Fragment {
                 else {
                     Toast.makeText(getContext(), "You already posted something today", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        // Scrolls back to the top of the Fragment
+        scrollButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scrollView.smoothScrollTo(0,0);
             }
         });
 

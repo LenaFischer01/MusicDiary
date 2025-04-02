@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         app:tabIndicatorColor="@color/white"
         app:tabSelectedTextColor="@color/white"
+        app:tabTextColor="@color/accentGrey"
         android:background="@drawable/rounded_tablayout_background"
         android:padding="0dp"
         android:layout_margin="8dp"
