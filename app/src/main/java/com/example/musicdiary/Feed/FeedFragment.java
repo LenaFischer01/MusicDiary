@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.musicdiary.Container.FriendObject;
@@ -31,6 +32,7 @@ public class FeedFragment extends Fragment {
 
     FeedRecyclerViewAdapter recyclerViewAdapter;
     List<FriendObject> friendlist = new ArrayList<>();
+    TextView noPostText;
     Boolean uploaded = false;
 
     public FeedFragment() {
@@ -48,12 +50,6 @@ public class FeedFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.feed, container, false);
 
-        //Testdaten
-        friendlist.add(new FriendObject("Lenaaa", "Das ist ein Testpost. Hier stehen post sachen drinne", "Starlight - Muse"));
-        friendlist.add(new FriendObject("Tom", "Just finished reading a great book!", "Imagine - John Lennon"));
-        friendlist.add(new FriendObject("Sarah", "Had an amazing day at the beach today.", "Walking on Sunshine - Katrina and the Waves"));
-        friendlist.add(new FriendObject("Jack", "Exploring new music genres lately.", "Bohemian Rhapsody - Queen"));
-        friendlist.add(new FriendObject("Emily", "Can’t wait for the weekend to start.", "Friday I'm in Love - The Cure"));
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewFriendsPosts);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -61,7 +57,28 @@ public class FeedFragment extends Fragment {
         recyclerViewAdapter = new FeedRecyclerViewAdapter(friendlist){};
         recyclerView.setAdapter(recyclerViewAdapter);
 
+        noPostText = view.findViewById(R.id.noPostTextFeed);
+
+        refreshData();
+
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshData();
+    }
+
+    private void refreshData(){
+        recyclerViewAdapter.notifyDataSetChanged();
+
+        if (friendlist.isEmpty()){
+            noPostText.setVisibility(View.VISIBLE);
+        }
+        else{
+            noPostText.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -90,7 +107,7 @@ public class FeedFragment extends Fragment {
                     uploaded = true;
                     friendlist.add(new FriendObject("You", postText, ""));
                     input.setText("");
-                    recyclerViewAdapter.notifyItemInserted(friendlist.size() - 1); // RecyclerView aktualisieren
+                    refreshData();
                 }
                 else {
                     Toast.makeText(getContext(), "You already posted something today", Toast.LENGTH_SHORT).show();

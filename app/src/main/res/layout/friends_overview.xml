@@ -26,4 +26,13 @@
         android:layout_height="wrap_content"
         android:id="@+id/recyclerViewFriends" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Seems like you do not have any friends... That's sad"
+        android:id="@+id/noFriendsTextView"
+        android:visibility="invisible"
+        android:layout_marginBottom="8dp"/>
+
 </LinearLayout>
