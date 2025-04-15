@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.musicdiary.Container.FriendObject;
+import com.example.musicdiary.Container.Post;
 import com.example.musicdiary.R;
 import com.example.musicdiary.ViewPageAdapter;
 import com.google.android.material.tabs.TabLayout;
@@ -28,12 +30,13 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeedFragment extends Fragment {
+public class FeedFragment extends Fragment implements ChooseSongDialogFragment.ChooseSongDialogListener{
 
     FeedRecyclerViewAdapter recyclerViewAdapter;
     List<FriendObject> friendlist = new ArrayList<>();
     TextView noPostText;
     Boolean uploaded = false;
+    private Post tempPostObject;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -87,8 +90,10 @@ public class FeedFragment extends Fragment {
 
         Button uploadButton = (Button) view.findViewById(R.id.buttonUploadPost);
         Button chooseSong = (Button) view.findViewById(R.id.buttonChooseSong);
-        EditText input = (EditText) view.findViewById(R.id.editTextPost);
         Button scrollButton = (Button) view.findViewById(R.id.scrollButtonFeed);
+
+        EditText input = (EditText) view.findViewById(R.id.editTextPost);
+
         NestedScrollView scrollView = (NestedScrollView) view.findViewById(R.id.scrollviewFeed);
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
@@ -97,16 +102,13 @@ public class FeedFragment extends Fragment {
                 // Upload the Post to the DB
                 // Lock button until next day (If entry in DB, not working)
                 if (!uploaded){
-                    if (input.getText().isEmpty()){ // It's working, stop beeing so dramatic
-                        Toast.makeText(getContext(), "You cannot post something empty", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
+                    fillPostObject(view);
                     // First post mechanic - DB still missing
-                    String postText = input.getText() != null ? input.getText().toString() : "";
-                    uploaded = true;
-                    friendlist.add(new FriendObject("You", postText, ""));
-                    input.setText("");
+                    if (getOwnPost() != null){
+                        uploaded = true;
+                        friendlist.add(new FriendObject("You", getOwnPost()));
+                        input.setText("");
+                    }
                     refreshData();
                 }
                 else {
@@ -123,5 +125,41 @@ public class FeedFragment extends Fragment {
             }
         });
 
+        chooseSong.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialog();
+            }
+        });
+
+    }
+
+    void showDialog(){
+        DialogFragment dialogFragment = new ChooseSongDialogFragment();
+        dialogFragment.setTargetFragment(this,0);
+        dialogFragment.show(getActivity().getSupportFragmentManager(), "inputSong");
+    }
+    public Post getOwnPost(){
+        if (tempPostObject.getPostContent().isEmpty()){
+            Toast.makeText(getContext(), "Your post is empty...", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        else if (tempPostObject.getSong().isEmpty()){
+            Toast.makeText(getContext(), "Your song is missing...", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        return tempPostObject;
+    }
+
+    public void fillPostObject(View view){
+        EditText input = (EditText) view.findViewById(R.id.editTextPost);
+        if (!input.getText().equals("") && input.getText() != null){
+            tempPostObject.setPostContent(input.getText().toString());
+        }
+    }
+
+    @Override
+    public void onDialogSubmit(String songName) {
+        Toast.makeText(getContext(), "Song Name: " + songName, Toast.LENGTH_SHORT).show();
     }
 }

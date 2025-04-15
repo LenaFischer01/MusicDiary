@@ -32,8 +32,8 @@ public class FeedRecyclerViewAdapter extends RecyclerView.Adapter<FeedRecyclerVi
         FriendObject friend = items.get(position);
 
         holder.viewFriendsName.setText(friend.getUsername());
-        holder.viewFriendspost.setText(friend.getTodaysPostString());
-        holder.viewFriendssong.setText(friend.getTodaysPostSong());
+        holder.viewFriendspost.setText(friend.getTodaysPost().getPostContent());
+        holder.viewFriendssong.setText(friend.getTodaysPost().getSong());
 
     }
 
