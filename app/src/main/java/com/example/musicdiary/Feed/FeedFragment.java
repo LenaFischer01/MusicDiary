@@ -160,6 +160,8 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
     @Override
     public void onDialogSubmit(String songName) {
+        // Edit tempPostObject (add Song and Interpret)
+        // First clean the string the user put in
         Toast.makeText(getContext(), "Song Name: " + songName, Toast.LENGTH_SHORT).show();
     }
 }

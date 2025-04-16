@@ -46,11 +46,13 @@ public class ChooseSongDialogFragment extends DialogFragment {
         inputEditText = view.findViewById(R.id.insertSongEditText);
 
         builder.setView(view)
+                .setTitle("Enter song details")
                 .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (listener != null) {
                             String songName = inputEditText.getText().toString();
+                            // Add a check here, if syntax of song is correct, if not, do not submit but wait for it to be edited
                             listener.onDialogSubmit(songName);
                         }
                         else{
@@ -65,6 +67,10 @@ public class ChooseSongDialogFragment extends DialogFragment {
                     }
                 });
 
-        return builder.create();
+        AlertDialog dialog = builder.create();
+
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_layout_background);
+
+        return dialog;
     }
 }
