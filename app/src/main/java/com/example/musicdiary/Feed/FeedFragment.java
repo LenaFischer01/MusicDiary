@@ -27,7 +27,12 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class FeedFragment extends Fragment implements ChooseSongDialogFragment.ChooseSongDialogListener{
@@ -35,8 +40,9 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
     FeedRecyclerViewAdapter recyclerViewAdapter;
     List<FriendObject> friendlist = new ArrayList<>();
     TextView noPostText;
-    Boolean uploaded = false;
+    private String lastUploadDate;
     private Post tempPostObject;
+    private TextView displaySong;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -94,20 +100,40 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
         EditText input = (EditText) view.findViewById(R.id.editTextPost);
 
+        displaySong = (TextView) view.findViewById(R.id.textView_song_feed);
+
         NestedScrollView scrollView = (NestedScrollView) view.findViewById(R.id.scrollviewFeed);
+
+        // Get todays date in the pattern yyyy-M-d
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d");
+        String formattedDate = currentDate.format(formatter);
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Upload the Post to the DB
                 // Lock button until next day (If entry in DB, not working)
-                if (!uploaded){
-                    fillPostObject(view);
+                if (tempPostObject == null){
+                    tempPostObject = new Post();
+                }
+                if (tempPostObject.getSong() == null || tempPostObject.getSong() == ""){
+                    Toast.makeText(getContext(), "Your song is missing", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (tempPostObject.getPostContent() == null || tempPostObject.getPostContent()==""){
+                    Toast.makeText(getContext(), "Your post is missing", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!formattedDate.equals(lastUploadDate)){
+                    fillPostObject(input);
                     // First post mechanic - DB still missing
                     if (getOwnPost() != null){
-                        uploaded = true;
+                        lastUploadDate = formattedDate;
                         friendlist.add(new FriendObject("You", getOwnPost()));
                         input.setText("");
+                        displaySong.setText("Your song");
+
                     }
                     refreshData();
                 }
@@ -139,29 +165,54 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         dialogFragment.setTargetFragment(this,0);
         dialogFragment.show(getActivity().getSupportFragmentManager(), "inputSong");
     }
-    public Post getOwnPost(){
-        if (tempPostObject.getPostContent().isEmpty()){
-            Toast.makeText(getContext(), "Your post is empty...", Toast.LENGTH_SHORT).show();
-            return null;
-        }
-        else if (tempPostObject.getSong().isEmpty()){
-            Toast.makeText(getContext(), "Your song is missing...", Toast.LENGTH_SHORT).show();
-            return null;
-        }
-        return tempPostObject;
-    }
 
-    public void fillPostObject(View view){
-        EditText input = (EditText) view.findViewById(R.id.editTextPost);
-        if (!input.getText().equals("") && input.getText() != null){
+    /**This method checks if the tempPostObject is null or empty and returns it.
+     * @return tempPostObject*/
+    public Post getOwnPost(){
+        if (tempPostObject != null && !tempPostObject.getPostContent().isEmpty()){
+            if (tempPostObject.getSong() != null && !tempPostObject.getSong().isEmpty()){
+                return tempPostObject;
+            }
+            else {
+                Toast.makeText(getContext(), "Your song is missing...", Toast.LENGTH_SHORT).show();
+                return null;
+            }
+        }
+        else {
+            return null;
+        }
+    }
+    /**This method fills the TempPostObject with the user input in the EditText.*/
+    public void fillPostObject(EditText input){
+        if (input.getText() != null && !input.getText().toString().isEmpty()){
             tempPostObject.setPostContent(input.getText().toString());
         }
+        else {
+            tempPostObject.setPostContent("");
+        }
     }
 
+    /**This method is triggered when the submit button in the dialog to choose the song is pressed.
+     * It validates the input and adds it to the TempPostObject.*/
     @Override
     public void onDialogSubmit(String songName) {
-        // Edit tempPostObject (add Song and Interpret)
-        // First clean the string the user put in
-        Toast.makeText(getContext(), "Song Name: " + songName, Toast.LENGTH_SHORT).show();
+        if (!songName.isEmpty()){
+            songName.replace(" ", "");
+            if (songName.matches("^\\s*.+\\s*-\\s*.+\\s*$")){
+                String[] song = songName.split("-");
+                if (tempPostObject == null){
+                    tempPostObject = new Post();
+                }
+                tempPostObject.setSong(song[0]+" - "+song[1]);
+
+                displaySong.setText(song[0]+" - "+song[1]);
+            }
+            else {
+                Toast.makeText(getContext(), "Please use the correct syntax -> Song-Artist", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else {
+            Toast.makeText(getContext(), "You need to enter something...", Toast.LENGTH_SHORT).show();
+        }
     }
 }

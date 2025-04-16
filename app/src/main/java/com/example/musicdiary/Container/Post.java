@@ -27,4 +27,9 @@ public class Post {
     public void setSong(String song) {
         this.song = song;
     }
+
+    public void emptyPost(){
+        this.song = "";
+        this.postContent = "";
+    }
 }
