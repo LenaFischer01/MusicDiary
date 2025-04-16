@@ -29,7 +29,7 @@ public class DatabaseConnectorFirebase {
      * @param post The post object containing content and song.
      */
     public void addPost(String username, Post post) {
-        databaseReference.child("Posts").child(username).setValue(post);
+        databaseReference.child("Posts").child(username).push().setValue(post);
     }
 
     public void deleteUser(String username) {
@@ -93,19 +93,25 @@ public class DatabaseConnectorFirebase {
      */
     public void getPostForUser(String username, final PostCallback callback) {
         DatabaseReference postRef = databaseReference.child("Posts").child(username);
-
-        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Only retrieve the most recent post
+        postRef.limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Post post = dataSnapshot.getValue(Post.class);
-                callback.onCallback(post);
+                if (dataSnapshot.exists()) {
+                    // Since limitToLast(1), there will be only one child
+                    for (DataSnapshot child : dataSnapshot.getChildren()) {
+                        Post post = child.getValue(Post.class);
+                        callback.onCallback(post);
+                    }
+                } else {
+                    callback.onCallback(null);
+                }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                callback.onCallback(null); // Return null if error occurs
+                callback.onCallback(null);
             }
         });
     }
-
 }

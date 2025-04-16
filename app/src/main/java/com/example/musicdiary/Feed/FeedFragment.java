@@ -9,7 +9,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,21 +23,16 @@ import com.example.musicdiary.Container.Post;
 import com.example.musicdiary.DatabaseConnectorFirebase;
 import com.example.musicdiary.R;
 import com.example.musicdiary.SharedPreferencesHelper;
-import com.example.musicdiary.ViewPageAdapter;
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
+
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FeedFragment extends Fragment implements ChooseSongDialogFragment.ChooseSongDialogListener{
 
@@ -48,7 +42,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
     private Post tempPostObject;
     private TextView displaySong;
     private LocalDate currentDate;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d.M.yyyy");
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     public FeedFragment() {
         // Required empty public constructor
@@ -74,9 +68,18 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
         noPostText = view.findViewById(R.id.noPostTextFeed);
 
-        refreshData();
-
         currentDate = LocalDate.now();
+
+//        DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
+//        db.addPost("friend1", new Post("16.04.2025\n\ndas ist von User 1", "test-test"));
+//        db.addPost("friend2", new Post("16.04.2024\n\ndas ist von User 2", "test-test"));
+//        db.addUser("friend1");
+//        db.addUser("friend2");
+//
+        SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
+//        helper.addFriend("friend1");
+//        helper.addFriend("friend2");
+        helper.saveUploadDate("");
 
         return view;
     }
@@ -89,59 +92,49 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
     //THis will need to collect the list of friends in sharedpreferences and fetch the posts of the friends and add them to the friendlist
     //And only add those, that have the correct date
-    private void refreshData(){
+    private void refreshData() {
         friendlist.clear();
 
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
         DatabaseConnectorFirebase connectorFirebase = new DatabaseConnectorFirebase();
-
         Set<String> friends = helper.getFriends();
-        Map<String, Post> postMap = new HashMap<>();
 
-        connectorFirebase.getPostForUser(helper.getUsername(), new DatabaseConnectorFirebase.PostCallback() {
-            @Override
-            public void onCallback(Post post) {
-                friendlist.add(new FriendObject(helper.getUsername(), post));
+        String myUsername = helper.getUsername();
+        LocalDate currentDate = LocalDate.now();
+        String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+
+        AtomicInteger counter = new AtomicInteger(0);
+        int total = friends.size() + 1; // friends + user
+
+        // Get user post
+        connectorFirebase.getPostForUser(myUsername, post -> {
+            if (post != null && post.getPostContent() != null) {
+                if (post.getPostContent().startsWith(formattedDate)) {
+                    friendlist.add(new FriendObject(myUsername, post));
+                }
+            }
+            if (counter.incrementAndGet() == total) {
+                recyclerViewAdapter.notifyDataSetChanged();
+                noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.INVISIBLE);
             }
         });
 
-        for (String friend : friends){
-            connectorFirebase.getPostForUser(friend, new DatabaseConnectorFirebase.PostCallback() {
-                @Override
-                public void onCallback(Post post) {
-                    if (post != null){
-                        postMap.put(friend, post);
+        for (String friend : friends) {
+            if (friend.equals(myUsername)) continue;
+            connectorFirebase.getPostForUser(friend, post -> {
+                if (post != null && post.getPostContent() != null) {
+                    if (post.getPostContent().startsWith(formattedDate)) {
+                        friendlist.add(new FriendObject(friend, post));
                     }
+                }
+                if (counter.incrementAndGet() == total) {
+                    recyclerViewAdapter.notifyDataSetChanged();
+                    noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.INVISIBLE);
                 }
             });
-
-            if (currentDate != null) {
-                String formattedDate = currentDate.format(formatter);
-
-                if (postMap.get(friend) != null){
-                    if (postMap.get(friend).getPostContent().startsWith(formattedDate)){
-                        friendlist.add(new FriendObject(friend, postMap.get(friend)));
-                    }
-                    // Logic, to manage namechange Posts - Needs to be tested
-                    else if (postMap.get(friend).getPostContent().startsWith("#changedName")){
-                        String oldname = friend;
-                        String newName = postMap.get(friend).getPostContent().replace(" ", "").replace("#changedName", "");
-                        helper.deleteFriend(oldname);
-                        helper.addFriend(newName);
-                    }
-                }
-            }
-        }
-
-        recyclerViewAdapter.notifyDataSetChanged();
-
-        if (friendlist.isEmpty()){
-            noPostText.setVisibility(View.VISIBLE);
-        }
-        else{
-            noPostText.setVisibility(View.INVISIBLE);
         }
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -160,7 +153,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         SharedPreferencesHelper preferencesHelper = new SharedPreferencesHelper(getContext());
 
         // Get todays date in the pattern yyyy-M-d
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = currentDate.format(formatter);
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
@@ -193,14 +186,12 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                         Toast.makeText(getContext(), "Your post is missing", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    // First post mechanic - DB still missing
+
                     if (getOwnPost() != null){
                         preferencesHelper.saveUploadDate(formattedDate);
                         //this will has to be removed and replaced with a push to the db
                         uploadPost(preferencesHelper.getUsername(), getOwnPost());
-                        friendlist.add(new FriendObject(preferencesHelper.getUsername(), getOwnPost()));
                     }
-                    refreshData();
                 }
                 else {
                     Toast.makeText(getContext(), "You already posted something today", Toast.LENGTH_SHORT).show();
