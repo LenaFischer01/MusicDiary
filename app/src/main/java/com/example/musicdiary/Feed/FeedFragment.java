@@ -21,7 +21,9 @@ import android.widget.Toast;
 
 import com.example.musicdiary.Container.FriendObject;
 import com.example.musicdiary.Container.Post;
+import com.example.musicdiary.DatabaseConnectorFirebase;
 import com.example.musicdiary.R;
+import com.example.musicdiary.SharedPreferencesHelper;
 import com.example.musicdiary.ViewPageAdapter;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -33,16 +35,20 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class FeedFragment extends Fragment implements ChooseSongDialogFragment.ChooseSongDialogListener{
 
     FeedRecyclerViewAdapter recyclerViewAdapter;
     List<FriendObject> friendlist = new ArrayList<>();
     TextView noPostText;
-    private String lastUploadDate;
     private Post tempPostObject;
     private TextView displaySong;
+    private LocalDate currentDate;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d.M.yyyy");
 
     public FeedFragment() {
         // Required empty public constructor
@@ -70,6 +76,8 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
         refreshData();
 
+        currentDate = LocalDate.now();
+
         return view;
     }
 
@@ -79,7 +87,52 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         refreshData();
     }
 
+    //THis will need to collect the list of friends in sharedpreferences and fetch the posts of the friends and add them to the friendlist
+    //And only add those, that have the correct date
     private void refreshData(){
+        friendlist.clear();
+
+        SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
+        DatabaseConnectorFirebase connectorFirebase = new DatabaseConnectorFirebase();
+
+        Set<String> friends = helper.getFriends();
+        Map<String, Post> postMap = new HashMap<>();
+
+        connectorFirebase.getPostForUser(helper.getUsername(), new DatabaseConnectorFirebase.PostCallback() {
+            @Override
+            public void onCallback(Post post) {
+                friendlist.add(new FriendObject(helper.getUsername(), post));
+            }
+        });
+
+        for (String friend : friends){
+            connectorFirebase.getPostForUser(friend, new DatabaseConnectorFirebase.PostCallback() {
+                @Override
+                public void onCallback(Post post) {
+                    if (post != null){
+                        postMap.put(friend, post);
+                    }
+                }
+            });
+
+            if (currentDate != null) {
+                String formattedDate = currentDate.format(formatter);
+
+                if (postMap.get(friend) != null){
+                    if (postMap.get(friend).getPostContent().startsWith(formattedDate)){
+                        friendlist.add(new FriendObject(friend, postMap.get(friend)));
+                    }
+                    // Logic, to manage namechange Posts - Needs to be tested
+                    else if (postMap.get(friend).getPostContent().startsWith("#changedName")){
+                        String oldname = friend;
+                        String newName = postMap.get(friend).getPostContent().replace(" ", "").replace("#changedName", "");
+                        helper.deleteFriend(oldname);
+                        helper.addFriend(newName);
+                    }
+                }
+            }
+        }
+
         recyclerViewAdapter.notifyDataSetChanged();
 
         if (friendlist.isEmpty()){
@@ -104,8 +157,9 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
         NestedScrollView scrollView = (NestedScrollView) view.findViewById(R.id.scrollviewFeed);
 
+        SharedPreferencesHelper preferencesHelper = new SharedPreferencesHelper(getContext());
+
         // Get todays date in the pattern yyyy-M-d
-        LocalDate currentDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d");
         String formattedDate = currentDate.format(formatter);
 
@@ -114,32 +168,44 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
             public void onClick(View v) {
                 // Upload the Post to the DB
                 // Lock button until next day (If entry in DB, not working)
+
+                // If no valid username, do not post anything
+                if (preferencesHelper.getUsername() == null){
+                    Toast.makeText(getContext(), "First choose a valid username :)", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                //Check if post exists, else make new
                 if (tempPostObject == null){
                     tempPostObject = new Post();
                 }
+                //Check if the song and post content are there
                 if (tempPostObject.getSong() == null || tempPostObject.getSong() == ""){
                     Toast.makeText(getContext(), "Your song is missing", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (tempPostObject.getPostContent() == null || tempPostObject.getPostContent()==""){
-                    Toast.makeText(getContext(), "Your post is missing", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (!formattedDate.equals(lastUploadDate)){
+
+                //Check if there has been a post today
+                if (!formattedDate.equals(preferencesHelper.getUploadDAte())){
                     fillPostObject(input);
+
+                    if (tempPostObject.getPostContent() == null || tempPostObject.getPostContent()==""){
+                        Toast.makeText(getContext(), "Your post is missing", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     // First post mechanic - DB still missing
                     if (getOwnPost() != null){
-                        lastUploadDate = formattedDate;
-                        friendlist.add(new FriendObject("You", getOwnPost()));
-                        input.setText("");
-                        displaySong.setText("Your song");
-
+                        preferencesHelper.saveUploadDate(formattedDate);
+                        //this will has to be removed and replaced with a push to the db
+                        uploadPost(preferencesHelper.getUsername(), getOwnPost());
+                        friendlist.add(new FriendObject(preferencesHelper.getUsername(), getOwnPost()));
                     }
                     refreshData();
                 }
                 else {
                     Toast.makeText(getContext(), "You already posted something today", Toast.LENGTH_SHORT).show();
                 }
+                clearInputStuff(displaySong, input);
             }
         });
 
@@ -160,7 +226,19 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
     }
 
-    void showDialog(){
+    private void clearInputStuff(TextView text, EditText eText){
+        text.setText("Your song");
+        eText.setText("");
+        tempPostObject = null;
+    }
+
+    private void uploadPost(String username, Post post){
+        DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
+        databaseConnectorFirebase.addPost(username, post);
+        refreshData();
+    }
+
+    private void showDialog(){
         DialogFragment dialogFragment = new ChooseSongDialogFragment();
         dialogFragment.setTargetFragment(this,0);
         dialogFragment.show(getActivity().getSupportFragmentManager(), "inputSong");
@@ -168,7 +246,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
     /**This method checks if the tempPostObject is null or empty and returns it.
      * @return tempPostObject*/
-    public Post getOwnPost(){
+    private Post getOwnPost(){
         if (tempPostObject != null && !tempPostObject.getPostContent().isEmpty()){
             if (tempPostObject.getSong() != null && !tempPostObject.getSong().isEmpty()){
                 return tempPostObject;
@@ -183,9 +261,10 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         }
     }
     /**This method fills the TempPostObject with the user input in the EditText.*/
-    public void fillPostObject(EditText input){
+    private void fillPostObject(EditText input){
         if (input.getText() != null && !input.getText().toString().isEmpty()){
-            tempPostObject.setPostContent(input.getText().toString());
+            String formattedDate = currentDate.format(formatter);
+            tempPostObject.setPostContent(formattedDate+"\n\n" + input.getText().toString());
         }
         else {
             tempPostObject.setPostContent("");

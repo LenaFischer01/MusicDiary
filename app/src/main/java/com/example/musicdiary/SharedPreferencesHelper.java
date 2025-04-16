@@ -10,10 +10,22 @@ public class SharedPreferencesHelper {
     private static final String PREFS_NAME = "UserData";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_FRIENDS = "friends";
+    private static final String KEY_LAST_UPLOAD = "uploadDate";
     private SharedPreferences sharedPreferences;
 
+    /**UserData = PREFS_NAME*/
     public SharedPreferencesHelper(Context context){
         sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    }
+
+    public void saveUploadDate(String date){
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(KEY_LAST_UPLOAD, date);
+        editor.apply();
+    }
+
+    public String getUploadDAte(){
+        return sharedPreferences.getString(KEY_LAST_UPLOAD, null);
     }
 
     /**
