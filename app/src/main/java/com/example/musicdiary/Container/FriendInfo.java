@@ -3,9 +3,9 @@ package com.example.musicdiary.Container;
 public class FriendInfo {
     private String userID;
     private String username;
-    private Long sinceTimestamp;
+    private String sinceTimestamp;
 
-    public FriendInfo(String userID, String username, Long sinceTimestamp) {
+    public FriendInfo(String userID, String username, String sinceTimestamp) {
         this.userID = userID;
         this.username = username;
         this.sinceTimestamp = sinceTimestamp;
@@ -27,11 +27,11 @@ public class FriendInfo {
         this.username = username;
     }
 
-    public Long getSinceTimestamp() {
+    public String getSinceTimestamp() {
         return sinceTimestamp;
     }
 
-    public void setSinceTimestamp(Long sinceTimestamp) {
+    public void setSinceTimestamp(String sinceTimestamp) {
         this.sinceTimestamp = sinceTimestamp;
     }
 }

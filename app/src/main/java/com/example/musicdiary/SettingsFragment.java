@@ -63,7 +63,7 @@ public class SettingsFragment extends Fragment {
                     return;
                 }
                 else {
-                    newUsername = inputUsername.getText().toString();
+                    newUsername = inputUsername.getText().toString().replace(" ","");
                 }
 
                 DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
