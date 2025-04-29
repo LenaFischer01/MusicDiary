@@ -1,11 +1,18 @@
 package com.example.musicdiary;
 
+import androidx.annotation.NonNull;
+
+import com.example.musicdiary.Container.FriendInfo;
 import com.example.musicdiary.Container.Post;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DatabaseConnectorFirebase {
 
@@ -14,6 +21,9 @@ public class DatabaseConnectorFirebase {
     public DatabaseConnectorFirebase() {
         databaseReference = FirebaseDatabase.getInstance().getReference();
     }
+
+
+    /* ==========================  USER SETTERS  ========================== */
 
     /**
      * Add a new user to the database with a given userID and username.
@@ -54,23 +64,8 @@ public class DatabaseConnectorFirebase {
         });
     }
 
-    /**
-     * Add a post for a specific user.
-     * @param userID The user identifier.
-     * @param post The post object containing content and song.
-     */
-    public void addPost(String userID, Post post) {
-        databaseReference.child("Posts").child(userID).push().setValue(post);
-    }
 
-    /**
-     * Delete a user and all their posts from the database.
-     * @param userID The unique identifier (key) for the user.
-     */
-    public void deleteUser(String userID) {
-        databaseReference.child("Users").child(userID).removeValue();
-        databaseReference.child("Posts").child(userID).removeValue();
-    }
+    /* ==========================  USER GETTERS  ========================== */
 
     public interface UserExistsCallback {
         void onCallback(boolean exists);
@@ -95,6 +90,11 @@ public class DatabaseConnectorFirebase {
         });
     }
 
+    /**
+     * Check if a username exists.
+     * @param username The username to check.
+     * @param callback Callback returns true if username exists, false otherwise.
+     */
     public void usernameExists(final String username, final UserExistsCallback callback) {
         DatabaseReference usersRef = databaseReference.child("Users");
         usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -117,6 +117,33 @@ public class DatabaseConnectorFirebase {
             }
         });
     }
+
+
+    /* ==========================  USER DELETERS  ========================== */
+
+    /**
+     * Delete a user and all their posts from the database.
+     * @param userID The unique identifier (key) for the user.
+     */
+    public void deleteUser(String userID) {
+        databaseReference.child("Users").child(userID).removeValue();
+        databaseReference.child("Posts").child(userID).removeValue();
+    }
+
+
+    /* ==========================  POST SETTERS  ========================== */
+
+    /**
+     * Add a post for a specific user.
+     * @param userID The user identifier.
+     * @param post The post object containing content and song.
+     */
+    public void addPost(String userID, Post post) {
+        databaseReference.child("Posts").child(userID).push().setValue(post);
+    }
+
+
+    /* ==========================  POST GETTERS  ========================== */
 
     public interface PostCallback {
         void onCallback(Post post);
@@ -148,6 +175,9 @@ public class DatabaseConnectorFirebase {
         });
     }
 
+
+    /* ==========================  POST DELETERS  ========================== */
+
     /**
      * Delete all posts for a specific user from the database.
      * @param UID The user identifier.
@@ -156,4 +186,64 @@ public class DatabaseConnectorFirebase {
         DatabaseReference postRef = databaseReference.child("Posts").child(UID);
         postRef.removeValue();
     }
+
+    /* ==========================  FRIEND OPTIONS  ========================== */
+
+    /**
+     * Add a friend entry for the current user.
+     * The friendship timestamp is saved as server timestamp.
+     * @param currentUserID The user adding a friend.
+     * @param friendInfo The FriendInfo object of the friend to add.
+     */
+    public void addFriend(String currentUserID, FriendInfo friendInfo) {
+        databaseReference.child("Friends").child(currentUserID).child(friendInfo.getUserID()).setValue(friendInfo);
+    }
+
+    /**
+     * Remove friend entry for the current user.
+     * @param currentUserID The user removing a friend.
+     * @param friendUserID The userID of the friend to remove.
+     */
+    public void removeFriend(String currentUserID, String friendUserID) {
+        // Remove the friend entry under currentUserID/friendUserID
+        databaseReference.child("Friends").child(currentUserID).child(friendUserID).removeValue();
+    }
+
+    /**
+     * Retrieve the list of friends of a specific user.
+     * Callback returns a map of friendUserIDs to friendship info objects (e.g. since timestamp).
+     * It will return a Map: K = UID of Friend; V = FriendInfo Object (username etc.).
+     * @param currentUserID The user whose friends to get.
+     * @param callback The callback to handle the results
+     */
+    public void getFriendList(String currentUserID, final FriendListCallback callback) {
+        DatabaseReference friendsRef = databaseReference.child("Friends").child(currentUserID);
+        friendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Map<String, FriendInfo> friendMap = new HashMap<>();
+                if (snapshot.exists()) {
+                    for (DataSnapshot friendSnapshot : snapshot.getChildren()) {
+                        FriendInfo friendInfo = friendSnapshot.getValue(FriendInfo.class);
+                        if (friendInfo != null)
+                            friendMap.put(friendSnapshot.getKey(), friendInfo);
+                    }
+                }
+                callback.onCallback(friendMap);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onCallback(new HashMap<>());
+            }
+        });
+    }
+
+    /**
+     * Callback interface for friend list retrieval.
+     */
+    public interface FriendListCallback {
+        void onCallback(Map<String, FriendInfo> friends);
+    }
+
 }

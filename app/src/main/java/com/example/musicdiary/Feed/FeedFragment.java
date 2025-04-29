@@ -18,7 +18,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.musicdiary.Container.FriendObject;
+import com.example.musicdiary.Container.FriendInfo;
+import com.example.musicdiary.Container.FriendPostObject;
 import com.example.musicdiary.Container.Post;
 import com.example.musicdiary.DatabaseConnectorFirebase;
 import com.example.musicdiary.R;
@@ -29,15 +30,17 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+import java.util.HashSet;
 import java.util.List;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FeedFragment extends Fragment implements ChooseSongDialogFragment.ChooseSongDialogListener{
 
     FeedRecyclerViewAdapter recyclerViewAdapter;
-    List<FriendObject> friendlist = new ArrayList<>();
+    List<FriendPostObject> friendlist = new ArrayList<>();
     TextView noPostText;
     private Post tempPostObject;
     private TextView displaySong;
@@ -79,7 +82,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
 //        helper.addFriend("friend1");
 //        helper.addFriend("e1242fc1-4307-4587-88f8-42aae95e610b");
-        helper.saveUploadDate("");
+//        helper.saveUploadDate("");
 
         return view;
     }
@@ -90,43 +93,53 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         refreshData();
     }
 
-    //THis will need to collect the list of friends in sharedpreferences and fetch the posts of the friends and add them to the friendlist
+    //THis will need to collect the list of friends from the Database and fetch the posts of the friends and add them to the friendlist
     private void refreshData() {
         friendlist.clear();
 
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
         DatabaseConnectorFirebase connectorFirebase = new DatabaseConnectorFirebase();
-        Set<String> friends = helper.getFriends();
+        List<FriendInfo> friendInfoSet = new ArrayList<>();
 
-        String myUserID = helper.getUserID();
+        connectorFirebase.getFriendList(helper.getUserID(), new DatabaseConnectorFirebase.FriendListCallback() {
+            @Override
+            public void onCallback(Map<String, FriendInfo> friends) {
 
-        AtomicInteger counter = new AtomicInteger(0);
-        int total = friends.size() + 1; // friends + user
+                friendInfoSet.addAll(friends.values());
 
-        // Get user post
-        connectorFirebase.getPostForUser(myUserID, post -> {
-            if (post != null && post.getPostContent() != null) {
-                    friendlist.add(new FriendObject(helper.getName(), post));
-            }
-            if (counter.incrementAndGet() == total) {
-                recyclerViewAdapter.notifyDataSetChanged();
-                noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+                String myUserID = helper.getUserID();
+
+                AtomicInteger counter = new AtomicInteger(0);
+                int total = friendInfoSet.size() + 1; // friends + user
+
+                // Get user post
+                connectorFirebase.getPostForUser(myUserID, post -> {
+                    if (post != null && post.getPostContent() != null) {
+                        friendlist.add(new FriendPostObject(helper.getName(), post));
+                    }
+                    if (counter.incrementAndGet() == total) {
+                        recyclerViewAdapter.notifyDataSetChanged();
+                        noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+                    }
+                });
+
+
+                // Adds friendobjects to the friendlist for all posts in DB
+                for (FriendInfo friend : friendInfoSet){
+                    connectorFirebase.getPostForUser(friend.getUserID(), post -> {
+                        if (post != null && post.getPostContent() != null){
+                            friendlist.add(new FriendPostObject(friend.getUsername(), post));
+                        }
+                        if (counter.incrementAndGet() == total){
+                            recyclerViewAdapter.notifyDataSetChanged();
+                            noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+                        }
+                    });
+                }
             }
         });
 
-        // Adds friendobjects to the friendlist for all posts in DB
-        for (String friend : friends) {
-            if (friend.equals(myUserID)) continue;
-            connectorFirebase.getPostForUser(friend, post -> {
-                if (post != null && post.getPostContent() != null) {
-                        friendlist.add(new FriendObject(friend, post));
-                }
-                if (counter.incrementAndGet() == total) {
-                    recyclerViewAdapter.notifyDataSetChanged();
-                    noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.INVISIBLE);
-                }
-            });
-        }
+
     }
 
 

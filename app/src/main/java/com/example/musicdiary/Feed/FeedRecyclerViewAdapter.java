@@ -8,18 +8,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.musicdiary.Container.FriendObject;
+import com.example.musicdiary.Container.FriendPostObject;
 import com.example.musicdiary.R;
 
 import java.util.List;
 
 public class FeedRecyclerViewAdapter extends RecyclerView.Adapter<FeedRecyclerViewAdapter.EntryViewHolder>{
 
-    private List<FriendObject> items;
-    public FeedRecyclerViewAdapter(List<FriendObject> items){
+    private List<FriendPostObject> items;
+    public FeedRecyclerViewAdapter(List<FriendPostObject> items){
         this.items = items;
-
     }
+
     @NonNull
     @Override
     public EntryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -29,7 +29,7 @@ public class FeedRecyclerViewAdapter extends RecyclerView.Adapter<FeedRecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull EntryViewHolder holder, int position) {
-        FriendObject friend = items.get(position);
+        FriendPostObject friend = items.get(position);
 
         holder.viewFriendsName.setText(friend.getTodaysPost().getAuthor());
         holder.viewFriendspost.setText(friend.getTodaysPost().getPostContent());
