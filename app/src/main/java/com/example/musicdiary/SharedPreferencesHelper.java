@@ -40,7 +40,7 @@ public class SharedPreferencesHelper {
     }
 
     /**
-     * Saves the username.
+     * Saves the UserID.
      * @param userID ID that will be saved
      */
     public void saveUserID(String userID) {
@@ -50,7 +50,7 @@ public class SharedPreferencesHelper {
     }
 
     /**
-     * returns username
+     * returns UserID
      * @return UserID or Null.
      */
     public String getUserID() {
@@ -67,7 +67,7 @@ public class SharedPreferencesHelper {
 
     /**
      * Adds a friend to the list of stored friends.
-     * @param friend The friend's name to be added.
+     * @param friend The friend's ID to be added.
      */
     public void addFriend(String friend) {
         Set<String> friends = getFriends();

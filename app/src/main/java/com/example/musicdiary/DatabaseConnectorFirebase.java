@@ -147,4 +147,13 @@ public class DatabaseConnectorFirebase {
             }
         });
     }
+
+    /**
+     * Delete all posts for a specific user from the database.
+     * @param UID The user identifier.
+     */
+    public void deleteAllPostsForUser(String UID) {
+        DatabaseReference postRef = databaseReference.child("Posts").child(UID);
+        postRef.removeValue();
+    }
 }

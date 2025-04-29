@@ -56,7 +56,6 @@ public class SettingsFragment extends Fragment {
         checkUsername.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Click worked!", Toast.LENGTH_SHORT).show();
                 String newUsername="";
                 String userID = preferencesHelper.getUserID();
                 if (inputUsername.getText() == null || inputUsername.getText().equals("")) {
@@ -65,12 +64,10 @@ public class SettingsFragment extends Fragment {
                 }
                 else {
                     newUsername = inputUsername.getText().toString();
-                    Toast.makeText(getContext(), "68", Toast.LENGTH_SHORT).show();
                 }
 
                 DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
                 String finalNewUsername = newUsername;
-                Toast.makeText(getContext(), "73!", Toast.LENGTH_SHORT).show();
                 databaseConnectorFirebase.usernameExists(finalNewUsername, new DatabaseConnectorFirebase.UserExistsCallback() {
                     @Override
                     public void onCallback(boolean exists) {
@@ -86,6 +83,9 @@ public class SettingsFragment extends Fragment {
                             // Change displayed name
                             displayUsername.setText("Username: "+ finalNewUsername);
                             Toast.makeText(getContext(), "Username changed!", Toast.LENGTH_SHORT).show();
+
+                            //Clear input field
+                            inputUsername.setText("");
                         }
                     }
                 });

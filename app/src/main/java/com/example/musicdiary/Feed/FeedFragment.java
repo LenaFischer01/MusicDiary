@@ -78,7 +78,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 //
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
 //        helper.addFriend("friend1");
-//        helper.addFriend("friend2");
+//        helper.addFriend("e1242fc1-4307-4587-88f8-42aae95e610b");
         helper.saveUploadDate("");
 
         return view;
@@ -91,7 +91,6 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
     }
 
     //THis will need to collect the list of friends in sharedpreferences and fetch the posts of the friends and add them to the friendlist
-    //And only add those, that have the correct date
     private void refreshData() {
         friendlist.clear();
 
@@ -100,8 +99,6 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         Set<String> friends = helper.getFriends();
 
         String myUserID = helper.getUserID();
-        LocalDate currentDate = LocalDate.now();
-        String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
 
         AtomicInteger counter = new AtomicInteger(0);
         int total = friends.size() + 1; // friends + user
@@ -109,9 +106,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         // Get user post
         connectorFirebase.getPostForUser(myUserID, post -> {
             if (post != null && post.getPostContent() != null) {
-                if (post.getPostContent().startsWith(formattedDate)) {
                     friendlist.add(new FriendObject(helper.getName(), post));
-                }
             }
             if (counter.incrementAndGet() == total) {
                 recyclerViewAdapter.notifyDataSetChanged();
@@ -124,9 +119,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
             if (friend.equals(myUserID)) continue;
             connectorFirebase.getPostForUser(friend, post -> {
                 if (post != null && post.getPostContent() != null) {
-                    if (post.getPostContent().startsWith(formattedDate)) {
                         friendlist.add(new FriendObject(friend, post));
-                    }
                 }
                 if (counter.incrementAndGet() == total) {
                     recyclerViewAdapter.notifyDataSetChanged();
@@ -153,8 +146,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
         SharedPreferencesHelper preferencesHelper = new SharedPreferencesHelper(getContext());
 
-        // Get todays date in the pattern yyyy-M-d
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // Get todays date
         String formattedDate = currentDate.format(formatter);
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
@@ -190,7 +182,6 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
                     if (getOwnPost() != null){
                         preferencesHelper.saveUploadDate(formattedDate);
-                        //this will has to be removed and replaced with a push to the db
                         uploadPost(preferencesHelper.getUserID(), getOwnPost());
                     }
                 }
@@ -226,6 +217,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
     private void uploadPost(String userID, Post post){
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
+        databaseConnectorFirebase.deleteAllPostsForUser(userID);
         databaseConnectorFirebase.addPost(userID, post);
         refreshData();
     }
