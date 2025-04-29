@@ -38,7 +38,7 @@ public class SettingsFragment extends Fragment {
 
     private void refreshData(){
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
-        displayUsername.setText("Username: "+helper.getUsername());
+        displayUsername.setText("Username: "+helper.getName());
     }
 
     @Override
@@ -56,36 +56,36 @@ public class SettingsFragment extends Fragment {
         checkUsername.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(getContext(), "Click worked!", Toast.LENGTH_SHORT).show();
                 String newUsername="";
-                String finalOldUsername = preferencesHelper.getUsername();
+                String userID = preferencesHelper.getUserID();
                 if (inputUsername.getText() == null || inputUsername.getText().equals("")) {
                     Toast.makeText(getContext(), "Please enter a username", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 else {
                     newUsername = inputUsername.getText().toString();
+                    Toast.makeText(getContext(), "68", Toast.LENGTH_SHORT).show();
                 }
 
                 DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
                 String finalNewUsername = newUsername;
-                databaseConnectorFirebase.userExists(newUsername, new DatabaseConnectorFirebase.UserExistsCallback() {
+                Toast.makeText(getContext(), "73!", Toast.LENGTH_SHORT).show();
+                databaseConnectorFirebase.usernameExists(finalNewUsername, new DatabaseConnectorFirebase.UserExistsCallback() {
                     @Override
                     public void onCallback(boolean exists) {
                         if (exists){
-                            Toast.makeText(getContext(), "Username is already taken", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "This username is already taken.", Toast.LENGTH_SHORT).show();
                         }
-                        else{
-                            //Write new username in sharedprefs and push username in db
-                            databaseConnectorFirebase.addUser(finalNewUsername);
+                        else {
+                            // First change Username in sharedpreferences
+                            preferencesHelper.setName(finalNewUsername);
+                            // Change Username in Database
+                            databaseConnectorFirebase.renameUser(userID, finalNewUsername);
 
-                            preferencesHelper.saveUsername(finalNewUsername);
-                            Toast.makeText(getContext(), "Your username is now "+ finalNewUsername, Toast.LENGTH_SHORT).show();
-
-                            databaseConnectorFirebase.addPost(finalOldUsername, new Post("#changedName "+finalNewUsername, " - "));
-
-                            databaseConnectorFirebase.deleteUser(finalOldUsername);
-                            inputUsername.setText("");
-                            refreshData();
+                            // Change displayed name
+                            displayUsername.setText("Username: "+ finalNewUsername);
+                            Toast.makeText(getContext(), "Username changed!", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

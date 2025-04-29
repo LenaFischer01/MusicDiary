@@ -1,16 +1,25 @@
 package com.example.musicdiary.Container;
 
 public class Post {
-    public String postContent;
-    public String song;
+    private String postContent;
+    private String song;
+    private String author;
 
-    public Post(String postContent, String song) {
+    public Post(String postContent, String song, String author) {
         this.postContent = postContent;
         this.song = song;
     }
 
     // Default constructor required for calls to DataSnapshot.getValue(Post.class)
     public Post() {}
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 
     public String getPostContent() {
         return postContent;

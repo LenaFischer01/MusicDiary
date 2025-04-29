@@ -7,7 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SharedPreferencesHelper {
-    private static final String PREFS_NAME = "UserData";
+    private static final String PREFS_NAME = "userData";
+    private static final String KEY_USERID = "userID";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_FRIENDS = "friends";
     private static final String KEY_LAST_UPLOAD = "uploadDate";
@@ -16,6 +17,16 @@ public class SharedPreferencesHelper {
     /**UserData = PREFS_NAME*/
     public SharedPreferencesHelper(Context context){
         sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    }
+
+    public void setName(String username){
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(KEY_USERNAME, username);
+        editor.apply();
+    }
+
+    public String getName(){
+        return sharedPreferences.getString(KEY_USERNAME, null);
     }
 
     public void saveUploadDate(String date){
@@ -30,24 +41,24 @@ public class SharedPreferencesHelper {
 
     /**
      * Saves the username.
-     * @param username Username that will be saved
+     * @param userID ID that will be saved
      */
-    public void saveUsername(String username) {
+    public void saveUserID(String userID) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(KEY_USERNAME, username);
+        editor.putString(KEY_USERID, userID);
         editor.apply();
     }
 
     /**
      * returns username
-     * @return Username or Null.
+     * @return UserID or Null.
      */
-    public String getUsername() {
-        return sharedPreferences.getString(KEY_USERNAME, null);
+    public String getUserID() {
+        return sharedPreferences.getString(KEY_USERID, null);
     }
 
     /**
-     * Returns all saved friends
+     * Returns all saved friends (Their UIDs)
      * @return Set of friends / empty set
      */
     public Set<String> getFriends() {

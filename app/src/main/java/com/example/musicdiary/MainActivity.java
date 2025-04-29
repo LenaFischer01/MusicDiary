@@ -11,6 +11,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,5 +50,19 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).attach();
 
+        DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
+        SharedPreferencesHelper helper = new SharedPreferencesHelper(getApplicationContext());
+        String myUserID = UserIDManager.getOrGenerateUserID(getApplicationContext());
+
+        // Check if userID exists in DB, if not, add User in DB and SharedPreferences
+        databaseConnectorFirebase.userExists(myUserID, new DatabaseConnectorFirebase.UserExistsCallback() {
+            @Override
+            public void onCallback(boolean exists) {
+                if (!exists){
+                    databaseConnectorFirebase.addUser(myUserID, helper.getName());
+                    helper.saveUserID(myUserID);
+                }
+            }
+        });
     }
 }

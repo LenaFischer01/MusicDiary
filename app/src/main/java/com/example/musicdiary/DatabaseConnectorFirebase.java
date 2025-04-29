@@ -1,4 +1,5 @@
 package com.example.musicdiary;
+
 import com.example.musicdiary.Container.Post;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -10,54 +11,104 @@ public class DatabaseConnectorFirebase {
 
     private DatabaseReference databaseReference;
 
-    public DatabaseConnectorFirebase(){
+    public DatabaseConnectorFirebase() {
         databaseReference = FirebaseDatabase.getInstance().getReference();
     }
 
-    public void addUser(String username){
-        databaseReference.child("Users").child(username).setValue(username);
+    /**
+     * Add a new user to the database with a given userID and username.
+     * @param userID Unique identifier for the user (key).
+     * @param username Username (display name).
+     */
+    public void addUser(String userID, String username) {
+        databaseReference.child("Users").child(userID).setValue(username);
     }
 
     /**
-     * Adds a post for a specific user to the database, consisting of both a post content and a song.
-     *
-     * Usage:
-     * DatabaseConnector dbConnector = new DatabaseConnector();
-     * dbConnector.addPost("username1", new Post("This is a post", "Imagine - John Lennon"));
-     *
-     * @param username The username associated with the post.
-     * @param post The post object containing content and song.
+     * Rename a user by changing the username (not the userID) in the database.
+     * Updates the username in /Users as well as the author property in all posts.
+     * @param userID The unique identifier (key) for the user.
+     * @param newUsername The new display name for the user.
      */
-    public void addPost(String username, Post post) {
-        databaseReference.child("Posts").child(username).push().setValue(post);
+    public void renameUser(String userID, String newUsername) {
+        // Update username in /Users/userID
+        databaseReference.child("Users").child(userID).setValue(newUsername);
+
+        // Optionally author in each post
+        DatabaseReference postsRef = databaseReference.child("Posts").child(userID);
+        postsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        Post post = postSnapshot.getValue(Post.class);
+                        if (post != null && post.getAuthor() != null) {
+                            post.setAuthor(newUsername);
+                            postSnapshot.getRef().setValue(post);
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
     }
 
-    public void deleteUser(String username) {
-        DatabaseReference userRef = databaseReference.child("Users").child(username);
-        userRef.removeValue();
+    /**
+     * Add a post for a specific user.
+     * @param userID The user identifier.
+     * @param post The post object containing content and song.
+     */
+    public void addPost(String userID, Post post) {
+        databaseReference.child("Posts").child(userID).push().setValue(post);
+    }
+
+    /**
+     * Delete a user and all their posts from the database.
+     * @param userID The unique identifier (key) for the user.
+     */
+    public void deleteUser(String userID) {
+        databaseReference.child("Users").child(userID).removeValue();
+        databaseReference.child("Posts").child(userID).removeValue();
     }
 
     public interface UserExistsCallback {
         void onCallback(boolean exists);
     }
 
-    public void userExists(final String username, final UserExistsCallback callback) {
-        DatabaseReference usersRef = databaseReference.child("Users");
+    /**
+     * Check if a user exists.
+     * @param userID The user identifier to check.
+     * @param callback Callback returns true if user exists, false otherwise.
+     */
+    public void userExists(final String userID, final UserExistsCallback callback) {
+        DatabaseReference userRef = databaseReference.child("Users").child(userID);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                callback.onCallback(dataSnapshot.exists());
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onCallback(false);
+            }
+        });
+    }
 
+    public void usernameExists(final String username, final UserExistsCallback callback) {
+        DatabaseReference usersRef = databaseReference.child("Users");
         usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean exists = false;
-
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                    String existingUser = userSnapshot.getValue(String.class);
-                    if (existingUser != null && existingUser.equals(username)) {
+                    String existingUsername = userSnapshot.getValue(String.class);
+                    if (existingUsername != null && existingUsername.equals(username)) {
                         exists = true;
                         break;
                     }
                 }
-
-                callback.onCallback(exists); // Return the result through the callback
+                callback.onCallback(exists);
             }
 
             @Override
@@ -72,33 +123,16 @@ public class DatabaseConnectorFirebase {
     }
 
     /**
-     * Retrieves a post for a specified user from the database, including both content and song.
-     * Since database operations are asynchronous, the result is returned via a callback.
-     *
-     * Usage:
-     * DatabaseConnector dbConnector = new DatabaseConnector();
-     * dbConnector.getPostForUser("username1", new DatabaseConnector.PostCallback() {
-     *     @Override
-     *     public void onCallback(Post post) {
-     *         if (post != null) {
-     *             System.out.println("Post content: " + post.postContent + ", Song: " + post.song);
-     *         } else {
-     *             System.out.println("No post found for the user.");
-     *         }
-     *     }
-     * });
-     *
-     * @param username The username for which to retrieve the post.
-     * @param callback The callback that receives the post content and song.
+     * Retrieve the latest post for a specified user from the database.
+     * @param userID The user identifier.
+     * @param callback Callback returns the most recent post for the user.
      */
-    public void getPostForUser(String username, final PostCallback callback) {
-        DatabaseReference postRef = databaseReference.child("Posts").child(username);
-        // Only retrieve the most recent post
+    public void getPostForUser(String userID, final PostCallback callback) {
+        DatabaseReference postRef = databaseReference.child("Posts").child(userID);
         postRef.limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    // Since limitToLast(1), there will be only one child
                     for (DataSnapshot child : dataSnapshot.getChildren()) {
                         Post post = child.getValue(Post.class);
                         callback.onCallback(post);
@@ -107,7 +141,6 @@ public class DatabaseConnectorFirebase {
                     callback.onCallback(null);
                 }
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 callback.onCallback(null);

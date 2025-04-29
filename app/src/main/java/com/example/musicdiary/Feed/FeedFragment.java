@@ -99,7 +99,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         DatabaseConnectorFirebase connectorFirebase = new DatabaseConnectorFirebase();
         Set<String> friends = helper.getFriends();
 
-        String myUsername = helper.getUsername();
+        String myUserID = helper.getUserID();
         LocalDate currentDate = LocalDate.now();
         String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
 
@@ -107,10 +107,10 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         int total = friends.size() + 1; // friends + user
 
         // Get user post
-        connectorFirebase.getPostForUser(myUsername, post -> {
+        connectorFirebase.getPostForUser(myUserID, post -> {
             if (post != null && post.getPostContent() != null) {
                 if (post.getPostContent().startsWith(formattedDate)) {
-                    friendlist.add(new FriendObject(myUsername, post));
+                    friendlist.add(new FriendObject(helper.getName(), post));
                 }
             }
             if (counter.incrementAndGet() == total) {
@@ -119,8 +119,9 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
             }
         });
 
+        // Adds friendobjects to the friendlist for all posts in DB
         for (String friend : friends) {
-            if (friend.equals(myUsername)) continue;
+            if (friend.equals(myUserID)) continue;
             connectorFirebase.getPostForUser(friend, post -> {
                 if (post != null && post.getPostContent() != null) {
                     if (post.getPostContent().startsWith(formattedDate)) {
@@ -162,8 +163,8 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                 // Upload the Post to the DB
                 // Lock button until next day (If entry in DB, not working)
 
-                // If no valid username, do not post anything
-                if (preferencesHelper.getUsername() == null){
+                // If the user hasn't set a name yet (Meaning also no UID) stop this
+                if (preferencesHelper.getName() == null || preferencesHelper.getUserID() == null){
                     Toast.makeText(getContext(), "First choose a valid username :)", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -190,7 +191,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                     if (getOwnPost() != null){
                         preferencesHelper.saveUploadDate(formattedDate);
                         //this will has to be removed and replaced with a push to the db
-                        uploadPost(preferencesHelper.getUsername(), getOwnPost());
+                        uploadPost(preferencesHelper.getUserID(), getOwnPost());
                     }
                 }
                 else {
@@ -223,9 +224,9 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         tempPostObject = null;
     }
 
-    private void uploadPost(String username, Post post){
+    private void uploadPost(String userID, Post post){
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
-        databaseConnectorFirebase.addPost(username, post);
+        databaseConnectorFirebase.addPost(userID, post);
         refreshData();
     }
 
@@ -256,6 +257,9 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         if (input.getText() != null && !input.getText().toString().isEmpty()){
             String formattedDate = currentDate.format(formatter);
             tempPostObject.setPostContent(formattedDate+"\n\n" + input.getText().toString());
+
+            SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
+            tempPostObject.setAuthor(helper.getName());
         }
         else {
             tempPostObject.setPostContent("");
