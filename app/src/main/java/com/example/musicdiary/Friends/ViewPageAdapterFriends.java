@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.musicdiary.Friends.Overview.friendOverviewFragment;
-import com.example.musicdiary.Friends.Search.friendSearchFragment;
+import com.example.musicdiary.Friends.Search.FriendSearchFragment;
 import com.example.musicdiary.defaultFragment;
 
 public class ViewPageAdapterFriends extends FragmentStateAdapter {
@@ -20,7 +20,7 @@ public class ViewPageAdapterFriends extends FragmentStateAdapter {
             case 0:
                 return new friendOverviewFragment();
             case 1:
-                return new friendSearchFragment();
+                return new FriendSearchFragment();
             case 2:
                 return new friendrequestFragment();
             default:

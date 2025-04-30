@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import android.view.inputmethod.EditorInfo;
 
-public class friendSearchFragment extends Fragment {
+public class FriendSearchFragment extends Fragment {
 
     FriendSearchRecyclerViewAdapter adapter;
     List<FriendInfo> results = new ArrayList<>();
@@ -34,7 +34,7 @@ public class friendSearchFragment extends Fragment {
     private LocalDate currentDate;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    public friendSearchFragment(){
+    public FriendSearchFragment(){
         //
     }
 
@@ -136,6 +136,7 @@ public class friendSearchFragment extends Fragment {
             else {
                 results.clear();
                 noResultText.setVisibility(View.VISIBLE);
+                refreshData();
             }
         });
     }

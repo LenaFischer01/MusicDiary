@@ -23,6 +23,7 @@ import java.util.Map;
 public class FriendSearchRecyclerViewAdapter extends RecyclerView.Adapter<FriendSearchRecyclerViewAdapter.EntryViewHolder> {
 
     private List<FriendInfo> items;
+    private String UID;
 
     public FriendSearchRecyclerViewAdapter(List<FriendInfo> items){
         this.items = items;
@@ -32,6 +33,8 @@ public class FriendSearchRecyclerViewAdapter extends RecyclerView.Adapter<Friend
     @Override
     public EntryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friendcard_search, parent, false);
+        SharedPreferencesHelper helper = new SharedPreferencesHelper(view.getContext());
+        UID = helper.getUserID();
         return new FriendSearchRecyclerViewAdapter.EntryViewHolder(view);
     }
 
@@ -41,6 +44,19 @@ public class FriendSearchRecyclerViewAdapter extends RecyclerView.Adapter<Friend
 
         FriendInfo info = items.get(position);
         holder.viewFriendName.setText(info.getUsername());
+
+        databaseConnectorFirebase.getFriendList(UID, new DatabaseConnectorFirebase.FriendListCallback() {
+            @Override
+            public void onCallback(Map<String, FriendInfo> friends) {
+                if (friends.containsKey(info.getUserID())) {
+                    holder.addFriend.setText("Added");
+                    holder.addFriend.setEnabled(false);
+                } else {
+                    holder.addFriend.setText("Add");
+                    holder.addFriend.setEnabled(true);
+                }
+            }
+        });
 
         holder.addFriend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,6 +72,8 @@ public class FriendSearchRecyclerViewAdapter extends RecyclerView.Adapter<Friend
                         else {
                             Toast.makeText(v.getContext(), "Added!", Toast.LENGTH_SHORT).show();
                             holder.addFriend.setText("Added");
+
+                            holder.addFriend.setEnabled(false);
 
                             // Mechanic to really add friend
                             info.setSinceTimestamp(LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));

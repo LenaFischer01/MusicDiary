@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="16dp"
-    android:background="@drawable/border_background"
+    android:background="@drawable/rounded_layout_background"
     >
 
     <LinearLayout
