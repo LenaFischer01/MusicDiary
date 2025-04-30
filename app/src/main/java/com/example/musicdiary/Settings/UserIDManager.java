@@ -1,7 +1,8 @@
-package com.example.musicdiary;
+package com.example.musicdiary.Settings;
 
 import android.content.Context;
-import android.content.SharedPreferences;
+
+import com.example.musicdiary.MAIN.SharedPreferencesHelper;
 
 import java.util.UUID;
 

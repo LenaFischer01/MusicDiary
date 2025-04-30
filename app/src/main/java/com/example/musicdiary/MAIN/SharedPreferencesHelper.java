@@ -1,10 +1,7 @@
-package com.example.musicdiary;
+package com.example.musicdiary.MAIN;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class SharedPreferencesHelper {
     private static final String PREFS_NAME = "userData";

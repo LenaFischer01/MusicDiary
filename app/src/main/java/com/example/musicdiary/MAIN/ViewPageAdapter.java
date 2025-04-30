@@ -1,4 +1,4 @@
-package com.example.musicdiary;
+package com.example.musicdiary.MAIN;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -7,6 +7,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.musicdiary.Feed.FeedFragment;
 import com.example.musicdiary.Friends.FriendsFragment;
+import com.example.musicdiary.Settings.SettingsFragment;
 
 public class ViewPageAdapter extends FragmentStateAdapter {
     public ViewPageAdapter(@NonNull FragmentActivity fragmentActivity) {

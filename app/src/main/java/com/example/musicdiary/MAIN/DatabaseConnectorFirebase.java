@@ -1,4 +1,4 @@
-package com.example.musicdiary;
+package com.example.musicdiary.MAIN;
 
 import androidx.annotation.NonNull;
 

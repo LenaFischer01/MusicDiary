@@ -21,20 +21,18 @@ import android.widget.Toast;
 import com.example.musicdiary.Container.FriendInfo;
 import com.example.musicdiary.Container.FriendPostObject;
 import com.example.musicdiary.Container.Post;
-import com.example.musicdiary.DatabaseConnectorFirebase;
+import com.example.musicdiary.MAIN.DatabaseConnectorFirebase;
 import com.example.musicdiary.R;
-import com.example.musicdiary.SharedPreferencesHelper;
+import com.example.musicdiary.MAIN.SharedPreferencesHelper;
 
 import java.time.LocalDate;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-import java.util.HashSet;
 import java.util.List;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FeedFragment extends Fragment implements ChooseSongDialogFragment.ChooseSongDialogListener{
@@ -87,6 +85,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 //            FriendInfo friendInfo = new FriendInfo(friendUserID, userString, currentDate.format(formatter));
 //            db.addFriend(helper.getUserID(), friendInfo);
 //        });
+        //db.removeFriend(helper.getUserID(), "df999a4a-dd82-4b23-8426-1d8a8f25273f");
 
         return view;
     }

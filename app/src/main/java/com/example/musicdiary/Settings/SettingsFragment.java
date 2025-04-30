@@ -1,4 +1,4 @@
-package com.example.musicdiary;
+package com.example.musicdiary.Settings;
 
 import android.os.Bundle;
 
@@ -12,7 +12,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.musicdiary.Container.Post;
+import com.example.musicdiary.MAIN.DatabaseConnectorFirebase;
+import com.example.musicdiary.R;
+import com.example.musicdiary.MAIN.SharedPreferencesHelper;
 
 
 public class SettingsFragment extends Fragment {
