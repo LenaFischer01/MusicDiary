@@ -122,7 +122,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                     }
                     if (counter.incrementAndGet() == total) {
                         recyclerViewAdapter.notifyDataSetChanged();
-                        noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+                        noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.GONE);
                     }
                 });
 
@@ -135,7 +135,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                         }
                         if (counter.incrementAndGet() == total){
                             recyclerViewAdapter.notifyDataSetChanged();
-                            noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+                            noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.GONE);
                         }
                     });
                 }

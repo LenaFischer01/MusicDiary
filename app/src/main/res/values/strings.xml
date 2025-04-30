@@ -2,4 +2,5 @@
     <string name="app_name">SoundBridge</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="nothing_to_display">Hm, pretty empty in here...</string>
 </resources>

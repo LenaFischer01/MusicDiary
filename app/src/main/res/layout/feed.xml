@@ -81,9 +81,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Seems like your friends haven't posted anything yet..."
+            android:text="@string/nothing_to_display"
             android:id="@+id/noPostTextFeed"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:layout_marginBottom="8dp"/>
 
         <Button

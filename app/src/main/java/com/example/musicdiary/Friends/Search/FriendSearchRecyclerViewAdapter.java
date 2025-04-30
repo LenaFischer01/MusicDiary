@@ -1,4 +1,4 @@
-package com.example.musicdiary.Friends;
+package com.example.musicdiary.Friends.Search;
 
 import android.view.LayoutInflater;
 import android.view.View;

@@ -1,4 +1,4 @@
-package com.example.musicdiary.Friends;
+package com.example.musicdiary.Friends.Overview;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

@@ -1,4 +1,4 @@
-package com.example.musicdiary.Friends;
+package com.example.musicdiary.Friends.Search;
 
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -42,6 +42,7 @@ public class friendSearchFragment extends Fragment {
     public void onResume() {
         super.onResume();
         results.clear();
+        noResultText.setVisibility(View.GONE);
         refreshData();
     }
 
@@ -67,6 +68,8 @@ public class friendSearchFragment extends Fragment {
 
         searchBar = view.findViewById(R.id.editTextSearchFriends);
         currentDate = LocalDate.now();
+
+        noResultText = view.findViewById(R.id.textViewNoSearchResult);
 
         return view;
     }
@@ -114,6 +117,7 @@ public class friendSearchFragment extends Fragment {
 
         databaseConnectorFirebase.usernameExists(username, exists -> {
             if (exists){
+                noResultText.setVisibility(View.GONE);
                 databaseConnectorFirebase.getUserDataByName(username, userString -> {
                     FriendInfo friendInfo = new FriendInfo(userString, username, currentDate.format(formatter));
                     // databaseConnectorFirebase.addFriend(helper.getUserID(), friendInfo);
@@ -131,7 +135,7 @@ public class friendSearchFragment extends Fragment {
             }
             else {
                 results.clear();
-                // Show default fragment in adapter
+                noResultText.setVisibility(View.VISIBLE);
             }
         });
     }
