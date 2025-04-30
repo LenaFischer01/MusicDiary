@@ -73,16 +73,20 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
         currentDate = LocalDate.now();
 
-//        DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
-//        db.addPost("friend1", new Post("16.04.2025\n\ndas ist von User 1", "test-test"));
-//        db.addPost("friend2", new Post("16.04.2024\n\ndas ist von User 2", "test-test"));
-//        db.addUser("friend1");
-//        db.addUser("friend2");
-//
+        DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
-//        helper.addFriend("friend1");
-//        helper.addFriend("e1242fc1-4307-4587-88f8-42aae95e610b");
-//        helper.saveUploadDate("");
+
+//        String friendUserID = "df999a4a-dd82-4b23-8426-1d8a8f25273f";
+//        db.getUserDataByID(friendUserID, userString -> {
+//            FriendInfo friendInfo = new FriendInfo(friendUserID, userString, currentDate.format(formatter));
+//            db.addFriend(helper.getUserID(), friendInfo);
+//        });
+//
+//        String friendUserID2 = "e1242fc1-4307-4587-88f8-42aae95e610b";
+//        db.getUserDataByID(friendUserID, userString -> {
+//            FriendInfo friendInfo = new FriendInfo(friendUserID, userString, currentDate.format(formatter));
+//            db.addFriend(helper.getUserID(), friendInfo);
+//        });
 
         return view;
     }

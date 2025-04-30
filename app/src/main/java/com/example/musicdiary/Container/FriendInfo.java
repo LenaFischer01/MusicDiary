@@ -11,6 +11,10 @@ public class FriendInfo {
         this.sinceTimestamp = sinceTimestamp;
     }
 
+    public FriendInfo(){
+        // Empty constructor or else the app always crashes...
+    }
+
     public String getUserID() {
         return userID;
     }

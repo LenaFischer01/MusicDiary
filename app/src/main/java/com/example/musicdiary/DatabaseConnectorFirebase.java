@@ -8,7 +8,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -116,6 +115,68 @@ public class DatabaseConnectorFirebase {
                 callback.onCallback(false);
             }
         });
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    /**
+     * Retrieves the username associated with a given userID from the database.
+     *
+     * @param userID   The unique identifier for the user whose data is to be retrieved.
+     * @param callback The callback to return the username string. If user not found, returns null or empty string.
+     */
+    public void getUserDataByID(final String userID, final GetUserCallback callback) {
+        DatabaseReference userRef = databaseReference.child("Users").child(userID);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                callback.onCallback(dataSnapshot.getValue(String.class));
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onCallback("");
+            }
+        });
+    }
+
+    /**
+     * Finds a userID associated with a given username by searching all users in the database.
+     *
+     * @param username The username (display name) to search for.
+     * @param callback The callback to return the userID (as a string). If the username is not found, an empty string is returned.
+     */
+    public void getUserDataByName(final String username, final GetUserCallback callback) {
+        DatabaseReference usersRef = databaseReference.child("Users");
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                String UID = "";
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    String existingUsername = dataSnapshot.getValue(String.class);
+                    if (existingUsername != null && existingUsername.equals(username)) {
+                        UID = dataSnapshot.getKey();
+                        break;
+                    }
+                }
+                callback.onCallback(UID);
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {
+                callback.onCallback("");
+            }
+        });
+    }
+
+    /**
+     * Callback interface for returning a user-related string value from an asynchronous database request.
+     */
+    public interface GetUserCallback {
+        /**
+         * Invoked when the requested user data is available.
+         *
+         * @param userString The retrieved user string (username or userID, depending on method).
+         */
+        void onCallback(String userString);
     }
 
 
