@@ -52,6 +52,7 @@ public class SettingsFragment extends Fragment {
         EditText inputUsername = (EditText) view.findViewById(R.id.changeUsernameInput);
 
         Button checkUsername = (Button) view.findViewById(R.id.checkChangeUsernameButton);
+        Button deleteAccount = (Button) view.findViewById(R.id.deleteAccountButton);
 
         SharedPreferencesHelper preferencesHelper = new SharedPreferencesHelper(getContext());
 
@@ -91,6 +92,17 @@ public class SettingsFragment extends Fragment {
                         }
                     }
                 });
+            }
+        });
+
+        deleteAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
+                databaseConnectorFirebase.deleteUser(preferencesHelper.getUserID());
+                preferencesHelper.setName("");
+
+                displayUsername.setText("Username: ");
             }
         });
 

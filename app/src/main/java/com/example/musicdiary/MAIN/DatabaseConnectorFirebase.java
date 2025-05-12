@@ -231,6 +231,7 @@ public class DatabaseConnectorFirebase {
     public void deleteUser(String userID) {
         databaseReference.child("Users").child(userID).removeValue();
         databaseReference.child("Posts").child(userID).removeValue();
+        databaseReference.child("Friends").child(userID).removeValue();
     }
 
 

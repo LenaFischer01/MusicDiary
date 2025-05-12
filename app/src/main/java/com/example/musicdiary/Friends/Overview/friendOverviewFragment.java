@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,19 +20,13 @@ import com.example.musicdiary.R;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class friendOverviewFragment extends Fragment {
+public class friendOverviewFragment extends Fragment implements RemoveFriendDialog.RemoveFriendDialogListener {
 
     TextView noFriends;
     FriendsOverviewRecyclerViewAdapter adapter;
     List<FriendInfo> friendsList = new ArrayList<>();
     private String UID;
-
-
-    public friendOverviewFragment(){
-        // Alle alle
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,7 +42,14 @@ public class friendOverviewFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewFriends);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new FriendsOverviewRecyclerViewAdapter(friendsList);
+        adapter = new FriendsOverviewRecyclerViewAdapter(friendsList, new FriendsOverviewRecyclerViewAdapter.OnRemoveFriendClickListener() {
+            @Override
+            public void onRemoveFriendClick(FriendInfo info, int pos) {
+                RemoveFriendDialog dialog = RemoveFriendDialog.newInstance(info.getUserID(), pos);
+                dialog.setListener(friendOverviewFragment.this);
+                dialog.show(getParentFragmentManager(), "RemoveFriendDialog");
+            }
+        });
         recyclerView.setAdapter(adapter);
 
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
@@ -59,15 +61,14 @@ public class friendOverviewFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (friendsList.isEmpty()){
+        if (friendsList.isEmpty()) {
             noFriends.setVisibility(View.VISIBLE);
         }
         refreshData();
     }
 
-    private void refreshData(){
+    private void refreshData() {
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
-
         databaseConnectorFirebase.getFriendList(UID, friends -> {
             friendsList.clear();
             if (friends != null) {
@@ -81,5 +82,16 @@ public class friendOverviewFragment extends Fragment {
                 noFriends.setVisibility(View.GONE);
             }
         });
+    }
+
+    @Override
+    public void onDialogSubmit(String friendUserId, int position) {
+        DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
+        databaseConnectorFirebase.removeFriend(UID, friendUserId);
+        adapter.removeItem(position);
+        Toast.makeText(getContext(), "Removed friend", Toast.LENGTH_SHORT).show();
+        if (friendsList.isEmpty()) {
+            noFriends.setVisibility(View.VISIBLE);
+        }
     }
 }

@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.musicdiary.R;
@@ -72,5 +73,16 @@ public class ChooseSongDialogFragment extends DialogFragment {
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_layout_background);
 
         return dialog;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        AlertDialog dialog = (AlertDialog) getDialog();
+        if (dialog != null) {
+            int color = ContextCompat.getColor(requireContext(), R.color.colorAccent);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
+        }
     }
 }
