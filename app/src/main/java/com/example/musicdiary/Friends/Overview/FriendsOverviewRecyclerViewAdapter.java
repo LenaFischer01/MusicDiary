@@ -11,12 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicdiary.Container.FriendInfo;
-import com.example.musicdiary.Friends.Search.FriendSearchRecyclerViewAdapter;
 import com.example.musicdiary.MAIN.DatabaseConnectorFirebase;
 import com.example.musicdiary.MAIN.SharedPreferencesHelper;
 import com.example.musicdiary.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class FriendsOverviewRecyclerViewAdapter extends RecyclerView.Adapter<FriendsOverviewRecyclerViewAdapter.EntryViewHolder> {

@@ -23,7 +23,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import android.view.inputmethod.EditorInfo;
+import android.widget.Toast;
 
 public class FriendSearchFragment extends Fragment {
 
@@ -34,7 +37,7 @@ public class FriendSearchFragment extends Fragment {
     private LocalDate currentDate;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    public FriendSearchFragment(){
+    public FriendSearchFragment() {
         //
     }
 
@@ -42,11 +45,11 @@ public class FriendSearchFragment extends Fragment {
     public void onResume() {
         super.onResume();
         results.clear();
-        noResultText.setVisibility(View.GONE);
+        noResultText.setVisibility(View.VISIBLE);
         refreshData();
     }
 
-    private void refreshData(){
+    private void refreshData() {
         adapter.notifyDataSetChanged();
     }
 
@@ -58,12 +61,13 @@ public class FriendSearchFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view  = inflater.inflate(R.layout.searchfriends, container, false);
+        View view = inflater.inflate(R.layout.searchfriends, container, false);
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewSearchResults);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new FriendSearchRecyclerViewAdapter(results){};
+        adapter = new FriendSearchRecyclerViewAdapter(results) {
+        };
         recyclerView.setAdapter(adapter);
 
         searchBar = view.findViewById(R.id.editTextSearchFriends);
@@ -84,12 +88,17 @@ public class FriendSearchFragment extends Fragment {
         searchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+
                 if (actionId == EditorInfo.IME_ACTION_DONE ||
                         actionId == EditorInfo.IME_ACTION_SEND ||
                         actionId == EditorInfo.IME_ACTION_GO) {
 
                     // Get input as text
-                    String username = searchBar.getText().toString().replace(" ","");
+                    String username = searchBar.getText().toString().replace(" ", "");
+                    if (username.isEmpty()) {
+                        Toast.makeText(getContext(), "Please enter something....", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
 
                     getUserCard(username, databaseConnectorFirebase, searchBar);
 
@@ -99,7 +108,11 @@ public class FriendSearchFragment extends Fragment {
                 if (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
                         && event.getAction() == KeyEvent.ACTION_DOWN) {
 
-                    String username = searchBar.getText().toString().replace(" ","");
+                    String username = searchBar.getText().toString().replace(" ", "");
+                    if (username.isEmpty()) {
+                        Toast.makeText(getContext(), "Please enter something....", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
 
                     getUserCard(username, databaseConnectorFirebase, searchBar);
 
@@ -107,37 +120,49 @@ public class FriendSearchFragment extends Fragment {
                 }
 
                 return false;
-            }});
-
-
+            }
+        });
     }
 
-    private void getUserCard(String username, DatabaseConnectorFirebase databaseConnectorFirebase, EditText searchBar){
+    private void getUserCard(String substring, DatabaseConnectorFirebase databaseConnectorFirebase, EditText searchBar) {
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
 
-        databaseConnectorFirebase.usernameExists(username, exists -> {
-            if (exists){
-                noResultText.setVisibility(View.GONE);
-                databaseConnectorFirebase.getUserDataByName(username, userString -> {
-                    FriendInfo friendInfo = new FriendInfo(userString, username, currentDate.format(formatter));
-                    // databaseConnectorFirebase.addFriend(helper.getUserID(), friendInfo);
-                    // Show the friendcard here
+        databaseConnectorFirebase.getUsernamesContaining(substring, true, new DatabaseConnectorFirebase.UsernameListCallback() {
+            @Override
+            public void onCallback(List<String> usernames) {
+
+                if (usernames.isEmpty()) {
+                    noResultText.setVisibility(View.VISIBLE);
                     results.clear();
-
-                    if (friendInfo.getUserID().equals(helper.getUserID())){
-                        return;
-                    }
-
-                    results.add(friendInfo);
-                    searchBar.setText("");
                     refreshData();
-                });
-            }
-            else {
-                results.clear();
-                noResultText.setVisibility(View.VISIBLE);
-                refreshData();
+                    return;
+                } else {
+                    noResultText.setVisibility(View.GONE);
+                }
+
+                List<FriendInfo> tempResults = new ArrayList<>();
+                AtomicInteger responses = new AtomicInteger(0);
+
+                for (String username : usernames) {
+                    databaseConnectorFirebase.getUserDataByName(username, userString -> {
+                        if (!userString.equals(helper.getUserID())) { // don't add self
+                            FriendInfo friendInfo = new FriendInfo(userString, username, currentDate.format(formatter));
+                            tempResults.add(friendInfo);
+                        }
+                        // Check if this is the last response
+                        if (responses.incrementAndGet() == usernames.size()) {
+                            // All async responses finished, update results and UI
+                            results.clear();
+                            results.addAll(tempResults);
+                            searchBar.setText("");
+                            refreshData();
+                        }
+                    });
+                }
             }
         });
     }
 }
+
+
+

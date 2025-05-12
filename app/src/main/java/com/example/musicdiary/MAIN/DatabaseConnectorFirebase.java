@@ -117,6 +117,48 @@ public class DatabaseConnectorFirebase {
         });
     }
 
+    public interface UsernameListCallback {
+        void onCallback(java.util.List<String> usernames);
+    }
+
+    /**
+     * Finds and returns all usernames that contain the given substring.
+     * The search can optionally be case-insensitive.
+     *
+     * @param substring The text to look for within the usernames.
+     * @param ignoreCase If true, the search will be case-insensitive.
+     * @param callback Callback that receives a list of matching usernames (empty list if none found).
+     */
+    public void getUsernamesContaining(final String substring, final boolean ignoreCase, final UsernameListCallback callback) {
+        DatabaseReference usersRef = databaseReference.child("Users");
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                java.util.List<String> matches = new java.util.ArrayList<>();
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    String username = userSnapshot.getValue(String.class);
+                    if (username != null) {
+                        if (ignoreCase) {
+                            if (username.toLowerCase().contains(substring.toLowerCase())) {
+                                matches.add(username);
+                            }
+                        } else {
+                            if (username.contains(substring)) {
+                                matches.add(username);
+                            }
+                        }
+                    }
+                }
+                callback.onCallback(matches);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onCallback(new java.util.ArrayList<>());
+            }
+        });
+    }
+
     //----------------------------------------------------------------------------------------------
 
     /**

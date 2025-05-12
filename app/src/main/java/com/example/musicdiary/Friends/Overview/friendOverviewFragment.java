@@ -59,26 +59,26 @@ public class friendOverviewFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (friendsList.isEmpty()){
+            noFriends.setVisibility(View.VISIBLE);
+        }
         refreshData();
     }
 
     private void refreshData(){
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
 
-        databaseConnectorFirebase.getFriendList(UID, new DatabaseConnectorFirebase.FriendListCallback() {
-            @Override
-            public void onCallback(Map<String, FriendInfo> friends) {
-                friendsList.clear();
-                if (friends != null) {
-                    friendsList.addAll(friends.values());
-                }
-                adapter.notifyDataSetChanged();
+        databaseConnectorFirebase.getFriendList(UID, friends -> {
+            friendsList.clear();
+            if (friends != null) {
+                friendsList.addAll(friends.values());
+            }
+            adapter.notifyDataSetChanged();
 
-                if (friendsList.isEmpty()) {
-                    noFriends.setVisibility(View.VISIBLE);
-                } else {
-                    noFriends.setVisibility(View.GONE);
-                }
+            if (friendsList.isEmpty()) {
+                noFriends.setVisibility(View.VISIBLE);
+            } else {
+                noFriends.setVisibility(View.GONE);
             }
         });
     }

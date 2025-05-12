@@ -5,7 +5,8 @@
     android:orientation="horizontal"
     android:padding="16dp"
     android:background="@drawable/rounded_layout_background"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:layout_margin="4dp">
 
     <TextView
         android:id="@+id/textViewSearchFriendName"
