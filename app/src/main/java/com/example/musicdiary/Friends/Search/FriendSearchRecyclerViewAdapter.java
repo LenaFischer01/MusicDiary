@@ -14,6 +14,7 @@ import com.example.musicdiary.Container.FriendInfo;
 import com.example.musicdiary.MAIN.DatabaseConnectorFirebase;
 import com.example.musicdiary.MAIN.SharedPreferencesHelper;
 import com.example.musicdiary.R;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -33,8 +34,7 @@ public class FriendSearchRecyclerViewAdapter extends RecyclerView.Adapter<Friend
     @Override
     public EntryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friendcard_search, parent, false);
-        SharedPreferencesHelper helper = new SharedPreferencesHelper(view.getContext());
-        UID = helper.getUserID();
+        UID = FirebaseAuth.getInstance().getCurrentUser().getUid();
         return new FriendSearchRecyclerViewAdapter.EntryViewHolder(view);
     }
 
@@ -61,9 +61,8 @@ public class FriendSearchRecyclerViewAdapter extends RecyclerView.Adapter<Friend
         holder.addFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferencesHelper helper = new SharedPreferencesHelper(v.getContext());
 
-                databaseConnectorFirebase.getFriendList(helper.getUserID(), new DatabaseConnectorFirebase.FriendListCallback() {
+                databaseConnectorFirebase.getFriendList(FirebaseAuth.getInstance().getCurrentUser().getUid(), new DatabaseConnectorFirebase.FriendListCallback() {
                     @Override
                     public void onCallback(Map<String, FriendInfo> friends) {
                         if (friends.containsKey(info.getUserID())){
@@ -78,7 +77,7 @@ public class FriendSearchRecyclerViewAdapter extends RecyclerView.Adapter<Friend
                             // Mechanic to really add friend
                             info.setSinceTimestamp(LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 
-                            databaseConnectorFirebase.addFriend(helper.getUserID(), info);
+                            databaseConnectorFirebase.addFriend(FirebaseAuth.getInstance().getCurrentUser().getUid(), info);
                         }
                     }
                 });

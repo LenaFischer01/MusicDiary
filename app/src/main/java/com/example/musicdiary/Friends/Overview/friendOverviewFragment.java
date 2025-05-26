@@ -17,6 +17,7 @@ import com.example.musicdiary.Container.FriendInfo;
 import com.example.musicdiary.MAIN.DatabaseConnectorFirebase;
 import com.example.musicdiary.MAIN.SharedPreferencesHelper;
 import com.example.musicdiary.R;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +53,7 @@ public class friendOverviewFragment extends Fragment implements RemoveFriendDial
         });
         recyclerView.setAdapter(adapter);
 
-        SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
-        UID = helper.getUserID();
+        UID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         return view;
     }

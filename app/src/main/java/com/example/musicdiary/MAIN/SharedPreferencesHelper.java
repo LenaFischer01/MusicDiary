@@ -46,14 +46,6 @@ public class SharedPreferencesHelper {
         editor.apply();
     }
 
-    /**
-     * returns UserID
-     * @return UserID or Null.
-     */
-    public String getUserID() {
-        return sharedPreferences.getString(KEY_USERID, null);
-    }
-
     public String getTheme(){
         return sharedPreferences.getString(THEME, "AppTheme.Blue");
     }

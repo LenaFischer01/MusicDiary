@@ -13,6 +13,8 @@ import com.example.musicdiary.R;
 import com.example.musicdiary.Settings.UserIDManager;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,22 +63,32 @@ public class MainActivity extends AppCompatActivity {
                 }).attach();
 
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
-        String myUserID = UserIDManager.getOrGenerateUserID(getApplicationContext());
 
-
-
-        // Check if userID exists in DB, if not, add User in DB and SharedPreferences
-        databaseConnectorFirebase.userExists(myUserID, new DatabaseConnectorFirebase.UserExistsCallback() {
-            @Override
-            public void onCallback(boolean exists) {
-                if (!exists){
-                    databaseConnectorFirebase.addUser(myUserID, helper.getName());
-                    helper.saveUserID(myUserID);
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() == null) {
+            auth.signInAnonymously().addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    String uid = auth.getCurrentUser().getUid();
+                    initialiseUserInDB(uid, "Standardusername");
+                } else {
+                    // Fehlerbehandlung
                 }
-            }
-        });
-
-
+            });
+        } else {
+            String uid = auth.getCurrentUser().getUid();
+            initialiseUserInDB(uid, "Standardusername");
+        }
 
     }
+
+    private void initialiseUserInDB(String uid, String username) {
+        DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
+        db.userExists(uid, exists -> {
+            if (!exists) db.addOrUpdateUser(uid, username);
+            // TODO:
+//            helper.setName("Unnamed-User");
+//            db.renameUser(UserID, "Unnamed-User");
+        });
+    }
+
 }
