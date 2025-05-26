@@ -63,30 +63,21 @@ public class MainActivity extends AppCompatActivity {
                 }).attach();
 
 
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() == null) {
-            auth.signInAnonymously().addOnCompleteListener(this, task -> {
-                if (task.isSuccessful()) {
-                    String uid = auth.getCurrentUser().getUid();
-                    initialiseUserInDB(uid, "Standardusername");
-                    helper.setName("Standardusername");
-                } else {
-                    // Fehlerbehandlung... Ja das wird hier GROßGESCHRIEBEN
-                }
-            });
-        } else {
-            String uid = auth.getCurrentUser().getUid();
-            initialiseUserInDB(uid, "Standardusername");
-            helper.setName("Standardusername");
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String uid = user.getUid();
+            String username = user.getDisplayName();
+            initialiseUserInDB(uid, username);
+            helper.setName(username);
         }
 
     }
 
-    private void initialiseUserInDB(String uid, String username) {
-        DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
-        db.userExists(uid, exists -> {
-            if (!exists) db.addOrUpdateUser(uid, username);
-        });
-    }
+        private void initialiseUserInDB(String uid, String username) {
+            DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
+            db.userExists(uid, exists -> {
+                if (!exists) db.addOrUpdateUser(uid, username);
+            });
+        }
 
 }

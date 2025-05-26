@@ -1,5 +1,6 @@
 package com.example.musicdiary.Settings;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,9 +15,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.musicdiary.MAIN.DatabaseConnectorFirebase;
+import com.example.musicdiary.MAIN.LoginActivity;
 import com.example.musicdiary.R;
 import com.example.musicdiary.MAIN.SharedPreferencesHelper;
+import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class SettingsFragment extends Fragment implements AdapterView.OnItemSelectedListener {
 
@@ -65,6 +69,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         EditText inputUsername = view.findViewById(R.id.changeUsernameInput);
         Button checkUsername = view.findViewById(R.id.checkChangeUsernameButton);
         Button deleteAccount = view.findViewById(R.id.deleteAccountButton);
+        Button logout = view.findViewById(R.id.logoutButton);
 
         initSpinner(view);
 
@@ -101,10 +106,32 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
 
             new SharedPreferencesHelper(getContext()).setName("");
             new SharedPreferencesHelper(getContext()).saveUploadDate("");
-            displayUsername.setText("Username: ");
 
-            // Option: (Advanced) Logout/Neuanmeldung, um neue anonyme UID zu starten
-            // FirebaseAuth.getInstance().signOut();
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                user.delete()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                startActivity(new Intent(getContext(), LoginActivity.class));
+                                requireActivity().finish();
+                            } else {
+                                Exception e = task.getException();
+                            }
+                        });
+            }
+        });
+
+        logout.setOnClickListener(v -> {
+            new SharedPreferencesHelper(getContext()).setName("");
+            new SharedPreferencesHelper(getContext()).saveUploadDate("");
+            new SharedPreferencesHelper(getContext()).setTheme("");
+
+            AuthUI.getInstance()
+                    .signOut(requireContext())
+                    .addOnCompleteListener(task -> {
+                        startActivity(new Intent(getContext(), LoginActivity.class));
+                        requireActivity().finish();
+                    });
         });
 
         return view;

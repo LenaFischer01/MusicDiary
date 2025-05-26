@@ -78,6 +78,17 @@
 
     <Button
         style="@style/Widget.App.CustomButton"
+        android:id="@+id/logoutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="Logout"
+        android:layout_gravity="center"
+        android:layout_marginTop="32px"
+        />
+
+    <Button
+        style="@style/Widget.App.CustomButton"
         android:id="@+id/deleteAccountButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
