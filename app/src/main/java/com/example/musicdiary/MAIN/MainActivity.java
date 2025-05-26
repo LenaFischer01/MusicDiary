@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).attach();
 
-        DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() == null) {
@@ -70,13 +69,15 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     String uid = auth.getCurrentUser().getUid();
                     initialiseUserInDB(uid, "Standardusername");
+                    helper.setName("Standardusername");
                 } else {
-                    // Fehlerbehandlung
+                    // Fehlerbehandlung... Ja das wird hier GROßGESCHRIEBEN
                 }
             });
         } else {
             String uid = auth.getCurrentUser().getUid();
             initialiseUserInDB(uid, "Standardusername");
+            helper.setName("Standardusername");
         }
 
     }
@@ -85,9 +86,6 @@ public class MainActivity extends AppCompatActivity {
         DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
         db.userExists(uid, exists -> {
             if (!exists) db.addOrUpdateUser(uid, username);
-            // TODO:
-//            helper.setName("Unnamed-User");
-//            db.renameUser(UserID, "Unnamed-User");
         });
     }
 

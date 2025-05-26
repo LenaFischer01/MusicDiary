@@ -24,6 +24,15 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     private boolean isSpinnerInitialized = false;
     private int previousSpinnerPosition = -1;
 
+    // AuthUI.getInstance()
+    //   .signOut(this)
+    //   .addOnCompleteListener(task -> {
+    //       // zurück zur LoginActivity
+    //       startActivity(new Intent(this, LoginActivity.class));
+    //       finish();
+    //   });
+    // TODO
+
     public SettingsFragment() {}
 
     @Override
