@@ -47,9 +47,9 @@ public class FriendsFragment extends Fragment {
                         case 1:
                             tab.setText("Search friends");
                             break;
-                        case 2:
-                            tab.setText("Friend requests");
-                            break;
+//                        case 2:
+//                            tab.setText("Friend requests");
+//                            break;
                     }
                 }).attach();
 
@@ -58,7 +58,6 @@ public class FriendsFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
         super.onViewCreated(view, savedInstanceState);
     }
 }

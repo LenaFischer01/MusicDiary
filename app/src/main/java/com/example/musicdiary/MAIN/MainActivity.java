@@ -10,7 +10,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.musicdiary.R;
-import com.example.musicdiary.Settings.UserIDManager;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getApplicationContext());
 
         String themeName = helper.getTheme();
-        if (themeName == null){
+        if (themeName == null || themeName.isEmpty()){
             themeName = "AppTheme.Blue";
         }
 

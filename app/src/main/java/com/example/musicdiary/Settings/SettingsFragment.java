@@ -2,6 +2,8 @@ package com.example.musicdiary.Settings;
 
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +24,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class SettingsFragment extends Fragment implements AdapterView.OnItemSelectedListener {
+public class SettingsFragment extends Fragment implements AdapterView.OnItemSelectedListener, DeleteAccountDialog.DeleteAccountDialogListener, LogoutDialogFragment.LogoutDialogListener{
 
     private TextView displayUsername;
     private boolean isSpinnerInitialized = false;
@@ -100,38 +102,16 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         });
 
         deleteAccount.setOnClickListener(v -> {
-            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
-            db.deleteUser(uid);
-
-            new SharedPreferencesHelper(getContext()).setName("");
-            new SharedPreferencesHelper(getContext()).saveUploadDate("");
-
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            if (user != null) {
-                user.delete()
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                startActivity(new Intent(getContext(), LoginActivity.class));
-                                requireActivity().finish();
-                            } else {
-                                Exception e = task.getException();
-                            }
-                        });
-            }
+            DeleteAccountDialog dialog = DeleteAccountDialog.newInstance();
+            dialog.setListener(this);
+            dialog.show(getParentFragmentManager(), "");
         });
 
         logout.setOnClickListener(v -> {
-            new SharedPreferencesHelper(getContext()).setName("");
-            new SharedPreferencesHelper(getContext()).saveUploadDate("");
-            new SharedPreferencesHelper(getContext()).setTheme("");
+            LogoutDialogFragment dialogFragment = LogoutDialogFragment.newInstance();
+            dialogFragment.setListener(this);
+            dialogFragment.show(getParentFragmentManager(), "");
 
-            AuthUI.getInstance()
-                    .signOut(requireContext())
-                    .addOnCompleteListener(task -> {
-                        startActivity(new Intent(getContext(), LoginActivity.class));
-                        requireActivity().finish();
-                    });
         });
 
         return view;
@@ -180,4 +160,42 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {}
+
+    @Override
+    public void onDialogSubmit() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
+        db.deleteUser(uid);
+
+        new SharedPreferencesHelper(getContext()).setName("");
+        new SharedPreferencesHelper(getContext()).saveUploadDate("");
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            user.delete()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            startActivity(new Intent(getContext(), LoginActivity.class));
+                            requireActivity().finish();
+                        } else {
+                            Exception e = task.getException();
+                            Toast.makeText(getContext(), "An error occurred", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void onDialogSubmitLogout() {
+        new SharedPreferencesHelper(getContext()).setName("");
+        new SharedPreferencesHelper(getContext()).saveUploadDate("");
+        new SharedPreferencesHelper(getContext()).setTheme("");
+
+        AuthUI.getInstance()
+                .signOut(requireContext())
+                .addOnCompleteListener(task -> {
+                    startActivity(new Intent(getContext(), LoginActivity.class));
+                    requireActivity().finish();
+                });
+    }
 }
