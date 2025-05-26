@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -87,7 +89,11 @@ public class ChooseSongDialogFragment extends DialogFragment {
         super.onStart();
         AlertDialog dialog = (AlertDialog) getDialog();
         if (dialog != null) {
-            int color = ContextCompat.getColor(requireContext(), R.color.colorAccentBlue);
+            TypedValue typedValue = new TypedValue();
+            Resources.Theme theme = requireContext().getTheme();
+            theme.resolveAttribute(android.R.attr.colorAccent, typedValue, true);
+            int color = typedValue.data;
+
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
         }
