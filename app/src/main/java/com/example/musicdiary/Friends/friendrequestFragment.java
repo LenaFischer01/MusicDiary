@@ -11,10 +11,16 @@ import androidx.fragment.app.Fragment;
 
 import com.example.musicdiary.R;
 
+/**
+ * Fragment representing the overview of friend requests.
+ */
 public class friendrequestFragment extends Fragment {
 
+    /**
+     * Default constructor.
+     */
     public friendrequestFragment(){
-        //
+        // Empty constructor
     }
 
     @Override
@@ -25,6 +31,7 @@ public class friendrequestFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // Inflate the layout for friend request overview
         View view = inflater.inflate(R.layout.friendrequest_overview, container, false);
 
         return view;
@@ -33,5 +40,6 @@ public class friendrequestFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        // Additional setup can be done here after the view is created
     }
 }

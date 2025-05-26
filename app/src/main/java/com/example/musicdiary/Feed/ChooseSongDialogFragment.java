@@ -17,8 +17,14 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.musicdiary.R;
 
+/**
+ * Dialog fragment to prompt user to enter a song name.
+ */
 public class ChooseSongDialogFragment extends DialogFragment {
 
+    /**
+     * Listener interface to handle the submit action with the entered song name.
+     */
     public interface ChooseSongDialogListener {
         void onDialogSubmit(String songName);
     }
@@ -30,6 +36,7 @@ public class ChooseSongDialogFragment extends DialogFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
+            // Try to get listener from the target fragment
             listener = (ChooseSongDialogListener) getTargetFragment();
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
@@ -53,10 +60,10 @@ public class ChooseSongDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         if (listener != null) {
                             String songName = inputEditText.getText().toString();
-                            // Add a check here, if syntax of song is correct, if not, do not submit but wait for it to be edited
                             listener.onDialogSubmit(songName);
                         }
                         else{
+                            // Listener is null
                             Toast.makeText(getContext(), "Listener ist null" , Toast.LENGTH_SHORT).show();
                         }
                     }

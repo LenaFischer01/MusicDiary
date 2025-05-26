@@ -9,10 +9,24 @@ import com.example.musicdiary.Feed.FeedFragment;
 import com.example.musicdiary.Friends.FriendsFragment;
 import com.example.musicdiary.Settings.SettingsFragment;
 
+/**
+ * Adapter for the ViewPager2 in MainActivity, manages the fragments for Feed, Friends, and Settings tabs.
+ */
 public class ViewPageAdapter extends FragmentStateAdapter {
+
+    /**
+     * Constructor for the adapter.
+     * @param fragmentActivity The hosting FragmentActivity.
+     */
     public ViewPageAdapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
     }
+
+    /**
+     * Creates a fragment for the given position.
+     * @param position The index of the fragment to create.
+     * @return The Fragment corresponding to the position.
+     */
     @NonNull
     @Override
     public Fragment createFragment(int position) {
@@ -28,6 +42,10 @@ public class ViewPageAdapter extends FragmentStateAdapter {
         }
     }
 
+    /**
+     * Returns the total number of pages.
+     * @return Number of total pages/fragments.
+     */
     @Override
     public int getItemCount() {
         return 3;

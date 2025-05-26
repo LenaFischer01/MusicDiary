@@ -14,8 +14,14 @@ import com.example.musicdiary.R;
 
 import java.util.List;
 
+/**
+ * RecyclerView adapter for displaying a list of friends with option to remove each friend.
+ */
 public class FriendsOverviewRecyclerViewAdapter extends RecyclerView.Adapter<FriendsOverviewRecyclerViewAdapter.EntryViewHolder> {
 
+    /**
+     * Listener interface for handling remove friend button clicks.
+     */
     public interface OnRemoveFriendClickListener {
         void onRemoveFriendClick(FriendInfo info, int pos);
     }
@@ -23,6 +29,11 @@ public class FriendsOverviewRecyclerViewAdapter extends RecyclerView.Adapter<Fri
     List<FriendInfo> items;
     OnRemoveFriendClickListener onRemoveFriendClickListener;
 
+    /**
+     * Constructor to initialize adapter with items and listener.
+     * @param items List of FriendInfo objects to display
+     * @param listener Listener for remove friend button clicks
+     */
     public FriendsOverviewRecyclerViewAdapter(List<FriendInfo> items, OnRemoveFriendClickListener listener) {
         this.items = items;
         this.onRemoveFriendClickListener = listener;
@@ -31,12 +42,14 @@ public class FriendsOverviewRecyclerViewAdapter extends RecyclerView.Adapter<Fri
     @NonNull
     @Override
     public EntryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Inflate the layout for a single friend card
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friendcard, parent, false);
         return new EntryViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull EntryViewHolder holder, int position) {
+        // Bind friend data to the viewholder
         FriendInfo info = items.get(position);
 
         holder.friendname.setText(info.getUsername());
@@ -57,11 +70,18 @@ public class FriendsOverviewRecyclerViewAdapter extends RecyclerView.Adapter<Fri
         return items.size();
     }
 
+    /**
+     * Removes the friend item at the specified position and notifies the adapter.
+     * @param position Position of the item to remove
+     */
     public void removeItem(int position) {
         items.remove(position);
         notifyItemRemoved(position);
     }
 
+    /**
+     * ViewHolder class holding references to friend card views.
+     */
     static class EntryViewHolder extends RecyclerView.ViewHolder {
         TextView friendname, friendsSince;
         Button removeFriend;

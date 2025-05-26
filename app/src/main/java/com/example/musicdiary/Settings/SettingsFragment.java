@@ -24,20 +24,15 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * SettingsFragment allows user to view and change username,
+ * select app theme, delete their account and logout.
+ */
 public class SettingsFragment extends Fragment implements AdapterView.OnItemSelectedListener, DeleteAccountDialog.DeleteAccountDialogListener, LogoutDialogFragment.LogoutDialogListener{
 
     private TextView displayUsername;
     private boolean isSpinnerInitialized = false;
     private int previousSpinnerPosition = -1;
-
-    // AuthUI.getInstance()
-    //   .signOut(this)
-    //   .addOnCompleteListener(task -> {
-    //       // zurück zur LoginActivity
-    //       startActivity(new Intent(this, LoginActivity.class));
-    //       finish();
-    //   });
-    // TODO
 
     public SettingsFragment() {}
 
@@ -52,13 +47,14 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
         refreshData();
     }
 
+    /**
+     * Refresh the displayed username by retrieving it directly from the database.
+     */
     private void refreshData() {
-        // Username IMMER direkt aus der DB holen, nicht (nur) lokal!
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
         db.getUsernameByID(uid, (username, userId) -> {
             displayUsername.setText("Username: " + (username.isEmpty() ? "?" : username));
-            // Option: helper.setName(username); // Sync lokalen Wert
         });
     }
 
@@ -85,16 +81,16 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
                 return;
             }
 
-            // Leere und bereits existierende Namen verhindern:
+            // Prevent empty or already existing names
             DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
             db.usernameExists(newUsernameInput, exists -> {
                 if (exists) {
                     Toast.makeText(getContext(), "This username is already taken.", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Nur neuen Namen updaten; Persistent Storage optional
+                    // Update to new name only; persistent storage optionally updated
                     db.renameUser(uid, newUsernameInput);
                     displayUsername.setText("Username: " + newUsernameInput);
-                    new SharedPreferencesHelper(getContext()).setName(newUsernameInput); // Optional, für lokale Anzeige
+                    new SharedPreferencesHelper(getContext()).setName(newUsernameInput); // Optional, for local display
                     Toast.makeText(getContext(), "Username changed!", Toast.LENGTH_SHORT).show();
                     inputUsername.setText("");
                 }
@@ -111,12 +107,15 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
             LogoutDialogFragment dialogFragment = LogoutDialogFragment.newInstance();
             dialogFragment.setListener(this);
             dialogFragment.show(getParentFragmentManager(), "");
-
         });
 
         return view;
     }
 
+    /**
+     * Initialize the theme selection spinner and set its listener.
+     * @param view The fragment's root view.
+     */
     private void initSpinner(View view) {
         Spinner spinner = view.findViewById(R.id.spinnerColortheme);
 
@@ -147,6 +146,7 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // Prevent triggering listener during initialization or on unchanged selection
         if (!isSpinnerInitialized) return;
         if (previousSpinnerPosition == position) return;
         previousSpinnerPosition = position;
@@ -161,6 +161,10 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
     @Override
     public void onNothingSelected(AdapterView<?> parent) {}
 
+    /**
+     * Callback when user confirms account deletion.
+     * Deletes user data from database and Firebase Authentication, then redirects to login.
+     */
     @Override
     public void onDialogSubmit() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -178,18 +182,22 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemSele
                             startActivity(new Intent(getContext(), LoginActivity.class));
                             requireActivity().finish();
                         } else {
-                            Exception e = task.getException();
                             Toast.makeText(getContext(), "An error occurred", Toast.LENGTH_SHORT).show();
                         }
                     });
         }
     }
 
+    /**
+     * Callback when user confirms logout.
+     * Clears local preferences, signs out from Firebase, and returns to login screen.
+     */
     @Override
     public void onDialogSubmitLogout() {
-        new SharedPreferencesHelper(getContext()).setName("");
-        new SharedPreferencesHelper(getContext()).saveUploadDate("");
-        new SharedPreferencesHelper(getContext()).setTheme("");
+        SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
+        helper.setName("");
+        helper.saveUploadDate("");
+        helper.setTheme("");
 
         AuthUI.getInstance()
                 .signOut(requireContext())

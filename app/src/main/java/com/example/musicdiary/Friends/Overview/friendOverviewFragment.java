@@ -22,6 +22,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment that displays an overview of friends.
+ * Allows removal of friends via a dialog.
+ */
 public class friendOverviewFragment extends Fragment implements RemoveFriendDialog.RemoveFriendDialogListener {
 
     TextView noFriends;
@@ -46,6 +50,7 @@ public class friendOverviewFragment extends Fragment implements RemoveFriendDial
         adapter = new FriendsOverviewRecyclerViewAdapter(friendsList, new FriendsOverviewRecyclerViewAdapter.OnRemoveFriendClickListener() {
             @Override
             public void onRemoveFriendClick(FriendInfo info, int pos) {
+                // Show dialog to confirm friend removal
                 RemoveFriendDialog dialog = RemoveFriendDialog.newInstance(info.getUserID(), pos);
                 dialog.setListener(friendOverviewFragment.this);
                 dialog.show(getParentFragmentManager(), "RemoveFriendDialog");
@@ -61,12 +66,16 @@ public class friendOverviewFragment extends Fragment implements RemoveFriendDial
     @Override
     public void onResume() {
         super.onResume();
+        // Show "no friends" message if the friends list is empty
         if (friendsList.isEmpty()) {
             noFriends.setVisibility(View.VISIBLE);
         }
         refreshData();
     }
 
+    /**
+     * Fetches friend list from the database and updates the UI.
+     */
     private void refreshData() {
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
         databaseConnectorFirebase.getFriendList(UID, friends -> {
@@ -76,6 +85,7 @@ public class friendOverviewFragment extends Fragment implements RemoveFriendDial
             }
             adapter.notifyDataSetChanged();
 
+            // Show or hide "no friends" message based on the list content
             if (friendsList.isEmpty()) {
                 noFriends.setVisibility(View.VISIBLE);
             } else {
@@ -84,6 +94,11 @@ public class friendOverviewFragment extends Fragment implements RemoveFriendDial
         });
     }
 
+    /**
+     * Callback when friend removal is confirmed in the dialog.
+     * @param friendUserId ID of the friend to remove
+     * @param position Position in the list
+     */
     @Override
     public void onDialogSubmit(String friendUserId, int position) {
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();

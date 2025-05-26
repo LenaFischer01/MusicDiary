@@ -13,9 +13,20 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.musicdiary.R;
 
+/**
+ * DialogFragment to confirm the removal of a friend.
+ */
 public class RemoveFriendDialog extends DialogFragment {
 
+    /**
+     * Listener interface to handle dialog submission for friend removal.
+     */
     public interface RemoveFriendDialogListener {
+        /**
+         * Called when the user confirms friend removal.
+         * @param friendUserId ID of the friend to remove
+         * @param position Position of the friend in the list
+         */
         void onDialogSubmit(String friendUserId, int position);
     }
 
@@ -26,10 +37,20 @@ public class RemoveFriendDialog extends DialogFragment {
     private String friendUserId;
     private int position;
 
+    /**
+     * Sets the listener to handle dialog result callbacks.
+     * @param listener The listener instance
+     */
     public void setListener(RemoveFriendDialogListener listener) {
         this.listener = listener;
     }
 
+    /**
+     * Creates a new instance of the dialog with the specified friend ID and position.
+     * @param friendUserId Friend's user ID
+     * @param position Position in the list
+     * @return New RemoveFriendDialog instance
+     */
     public static RemoveFriendDialog newInstance(String friendUserId, int position) {
         RemoveFriendDialog dialog = new RemoveFriendDialog();
         Bundle args = new Bundle();
@@ -42,6 +63,7 @@ public class RemoveFriendDialog extends DialogFragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        // Try to attach listener from parent fragment or context
         if (getParentFragment() instanceof RemoveFriendDialogListener) {
             listener = (RemoveFriendDialogListener) getParentFragment();
         } else if (context instanceof RemoveFriendDialogListener) {
@@ -75,7 +97,6 @@ public class RemoveFriendDialog extends DialogFragment {
         AlertDialog dialog = builder.create();
 
         dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_layout_background);
-
 
         return dialog;
     }

@@ -18,6 +18,9 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Activity that handles user login with Firebase Authentication UI.
+ */
 public class LoginActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> signInLauncher;
 
@@ -25,22 +28,27 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Launcher für das Auth-Result registrieren (modern!)
+        // Register launcher for the authentication result
         signInLauncher = registerForActivityResult(
                 new FirebaseAuthUIActivityResultContract(),
                 this::onSignInResult
         );
 
-        // Prüfen ob schon eingeloggt
+        // Check if user is already logged in
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
+            // User is logged in, start main activity
             startActivity(new Intent(this, MainActivity.class));
             finish();
         } else {
+            // No user logged in, start sign-in flow
             startSignInFlow();
         }
     }
 
+    /**
+     * Starts the Firebase UI sign-in flow with email provider.
+     */
     private void startSignInFlow() {
         List<AuthUI.IdpConfig> providers = Arrays.asList(
                 new AuthUI.IdpConfig.EmailBuilder().build()
@@ -53,13 +61,18 @@ public class LoginActivity extends AppCompatActivity {
         signInLauncher.launch(signInIntent);
     }
 
+    /**
+     * Handles the result from the sign-in flow.
+     * @param result The FirebaseAuthUIAuthenticationResult object containing the result.
+     */
     private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
         IdpResponse response = result.getIdpResponse();
         if (result.getResultCode() == RESULT_OK) {
-            // Erfolgreich eingeloggt
+            // Successfully signed in, start main activity
             startActivity(new Intent(this, MainActivity.class));
             finish();
         } else {
+            // Sign in failed or cancelled, close this activity
             finish();
         }
     }

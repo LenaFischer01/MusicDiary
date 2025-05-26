@@ -15,10 +15,14 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * Main activity hosting the primary application UI with tabs for Feed, Friends, and Settings.
+ */
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Retrieve theme from shared preferences, set default if none found
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getApplicationContext());
 
         String themeName = helper.getTheme();
@@ -29,24 +33,27 @@ public class MainActivity extends AppCompatActivity {
         setTheme(getResources().getIdentifier(themeName, "style", getPackageName()));
 
         super.onCreate(savedInstanceState);
+
+        // Enable edge-to-edge display
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // Adjust padding for system bars (status/navigation bar)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        ViewPager2 viewPager2;
-        TabLayout tabLayout;
+        ViewPager2 viewPager2 = findViewById(R.id.viewPager);
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
 
-        viewPager2 = (ViewPager2) findViewById(R.id.viewPager);
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-
+        // Setup adapter for the ViewPager2 managing the app sections
         ViewPageAdapter adapter = new ViewPageAdapter(this);
         viewPager2.setAdapter(adapter);
         viewPager2.setCurrentItem(0,true);
 
+        // Attach TabLayout with ViewPager2 for tab navigation
         new TabLayoutMediator(tabLayout, viewPager2,
                 (tab, position) -> {
                     switch (position) {
@@ -61,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).attach();
 
-
+        // Initialize user entry in database if logged in
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             String uid = user.getUid();
@@ -69,14 +76,18 @@ public class MainActivity extends AppCompatActivity {
             initialiseUserInDB(uid, username);
             helper.setName(username);
         }
-
     }
 
-        private void initialiseUserInDB(String uid, String username) {
-            DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
-            db.userExists(uid, exists -> {
-                if (!exists) db.addOrUpdateUser(uid, username);
-            });
-        }
+    /**
+     * Checks if the user exists in the database, and adds them if not.
+     * @param uid The user ID.
+     * @param username The username.
+     */
+    private void initialiseUserInDB(String uid, String username) {
+        DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
+        db.userExists(uid, exists -> {
+            if (!exists) db.addOrUpdateUser(uid, username);
+        });
+    }
 
 }

@@ -27,6 +27,9 @@ import java.util.List;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 
+/**
+ * Fragment to search for friends by username substring.
+ */
 public class FriendSearchFragment extends Fragment {
 
     FriendSearchRecyclerViewAdapter adapter;
@@ -46,6 +49,9 @@ public class FriendSearchFragment extends Fragment {
         refreshData();
     }
 
+    /**
+     * Notify adapter to refresh the displayed search results.
+     */
     private void refreshData() {
         adapter.notifyDataSetChanged();
     }
@@ -80,6 +86,7 @@ public class FriendSearchFragment extends Fragment {
 
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
 
+        // Listener for search action in the input field
         searchBar.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE ||
                     actionId == EditorInfo.IME_ACTION_SEND ||
@@ -93,6 +100,7 @@ public class FriendSearchFragment extends Fragment {
                     return true;
                 }
 
+                // Perform search with the entered username substring
                 performSearch(usernameInput, databaseConnectorFirebase);
 
                 return true;
@@ -101,6 +109,11 @@ public class FriendSearchFragment extends Fragment {
         });
     }
 
+    /**
+     * Searches users whose usernames contain the given substring, excluding the current user.
+     * @param substring The substring to search for in usernames
+     * @param databaseConnectorFirebase Instance to access Firebase database
+     */
     private void performSearch(String substring, DatabaseConnectorFirebase databaseConnectorFirebase) {
         String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         results.clear();
@@ -116,15 +129,13 @@ public class FriendSearchFragment extends Fragment {
                 noResultText.setVisibility(View.GONE);
             }
 
-            // Wir holen jetzt zu JEDER passenden Username die UID
-            // Schnellere Lösung: neuer Callback gibt beide Werte zurück
             List<FriendInfo> tempResults = new ArrayList<>();
             final int expected = usernames.size();
             final int[] done = {0};
 
             for (String matchedUsername : usernames) {
                 databaseConnectorFirebase.getUserDataByName(matchedUsername, (username, uid) -> {
-                    // Nicht den eigenen Account anzeigen
+                    // Do not show the user's own account
                     if (!uid.equals(myUid) && !uid.isEmpty() && !username.isEmpty()) {
                         tempResults.add(new FriendInfo(uid, username, currentDate.format(formatter)));
                     }

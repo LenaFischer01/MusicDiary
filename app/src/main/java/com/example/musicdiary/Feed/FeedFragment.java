@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Fragment displaying the feed with posts from friends and self.
+ */
 public class FeedFragment extends Fragment implements ChooseSongDialogFragment.ChooseSongDialogListener{
 
     FeedRecyclerViewAdapter recyclerViewAdapter;
@@ -50,7 +53,6 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         // Required empty public constructor
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +62,6 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.feed, container, false);
-
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewFriendsPosts);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -75,19 +76,6 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
 
-//        String friendUserID = "df999a4a-dd82-4b23-8426-1d8a8f25273f";
-//        db.getUserDataByID(friendUserID, userString -> {
-//            FriendInfo friendInfo = new FriendInfo(friendUserID, userString, currentDate.format(formatter));
-//            db.addFriend(helper.getUserID(), friendInfo);
-//        });
-//
-//        String friendUserID2 = "e1242fc1-4307-4587-88f8-42aae95e610b";
-//        db.getUserDataByID(friendUserID, userString -> {
-//            FriendInfo friendInfo = new FriendInfo(friendUserID, userString, currentDate.format(formatter));
-//            db.addFriend(helper.getUserID(), friendInfo);
-//        });
-        //db.removeFriend(helper.getUserID(), "df999a4a-dd82-4b23-8426-1d8a8f25273f");
-
         return view;
     }
 
@@ -97,7 +85,10 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         refreshData();
     }
 
-    //THis will need to collect the list of friends from the Database and fetch the posts of the friends and add them to the friendlist
+    /**
+     * This method collects the list of friends from the database,
+     * fetches their posts and adds them to the friend list.
+     */
     private void refreshData() {
         friendlist.clear();
 
@@ -127,8 +118,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                     }
                 });
 
-
-                // Adds friendobjects to the friendlist for all posts in DB
+                // Adds FriendPostObjects to the friend list for all posts in the database
                 for (FriendInfo friend : friendInfoSet){
                     connectorFirebase.getPostForUser(friend.getUserID(), post -> {
                         if (post != null && post.getPostContent() != null){
@@ -142,10 +132,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                 }
             }
         });
-
-
     }
-
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -163,36 +150,36 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
         SharedPreferencesHelper preferencesHelper = new SharedPreferencesHelper(getContext());
 
-        // Get todays date
+        // Get today's date
         String formattedDate = currentDate.format(formatter);
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Upload the Post to the DB
+                // Upload the post to the database
                 // Lock button until next day (If entry in DB, not working)
 
-                // If the user hasn't set a name yet (Meaning also no UID) stop this
+                // If the user hasn't set a name yet (meaning also no UID), stop this
                 if (preferencesHelper.getName() == null){
                     Toast.makeText(getContext(), "First choose a valid username :)", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                //Check if post exists, else make new
+                // Check if post exists, else create new
                 if (tempPostObject == null){
                     tempPostObject = new Post();
                 }
-                //Check if the song and post content are there
-                if (tempPostObject.getSong() == null || tempPostObject.getSong() == ""){
+                // Check if the song and post content are set
+                if (tempPostObject.getSong() == null || tempPostObject.getSong().isEmpty()){
                     Toast.makeText(getContext(), "Your song is missing", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                //Check if there has been a post today
+                // Check if there has been a post today
                 if (!formattedDate.equals(preferencesHelper.getUploadDAte())){
                     fillPostObject(input);
 
-                    if (tempPostObject.getPostContent() == null || tempPostObject.getPostContent()==""){
+                    if (tempPostObject.getPostContent() == null || tempPostObject.getPostContent().isEmpty()){
                         Toast.makeText(getContext(), "Your post is missing", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -209,7 +196,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
             }
         });
 
-        // Scrolls back to the top of the Fragment
+        // Scrolls back to the top of the fragment
         scrollButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -223,15 +210,24 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                 showDialog();
             }
         });
-
     }
 
+    /**
+     * Clears the input fields and resets tempPostObject.
+     * @param text TextView displaying the song
+     * @param eText EditText input for the post content
+     */
     private void clearInputStuff(TextView text, EditText eText){
         text.setText("Your song");
         eText.setText("");
         tempPostObject = null;
     }
 
+    /**
+     * Uploads the post to the database after deleting old posts for the user.
+     * @param userID User ID
+     * @param post Post to upload
+     */
     private void uploadPost(String userID, Post post){
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
         databaseConnectorFirebase.deleteAllPostsForUser(userID);
@@ -239,14 +235,19 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         refreshData();
     }
 
+    /**
+     * Shows the dialog to choose a song.
+     */
     private void showDialog(){
         DialogFragment dialogFragment = new ChooseSongDialogFragment();
         dialogFragment.setTargetFragment(this,0);
         dialogFragment.show(getActivity().getSupportFragmentManager(), "inputSong");
     }
 
-    /**This method checks if the tempPostObject is null or empty and returns it.
-     * @return tempPostObject*/
+    /**
+     * Checks if the tempPostObject is valid and returns it.
+     * @return valid tempPostObject or null if invalid
+     */
     private Post getOwnPost(){
         if (tempPostObject != null && !tempPostObject.getPostContent().isEmpty()){
             if (tempPostObject.getSong() != null && !tempPostObject.getSong().isEmpty()){
@@ -261,7 +262,11 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
             return null;
         }
     }
-    /**This method fills the TempPostObject with the user input in the EditText.*/
+
+    /**
+     * Fills the tempPostObject with the user input from the EditText.
+     * @param input EditText containing the user's post content
+     */
     private void fillPostObject(EditText input){
         if (input.getText() != null && !input.getText().toString().isEmpty()){
             String formattedDate = currentDate.format(formatter);
@@ -275,12 +280,15 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
         }
     }
 
-    /**This method is triggered when the submit button in the dialog to choose the song is pressed.
-     * It validates the input and adds it to the TempPostObject.*/
+    /**
+     * Called when the submit button in the choose song dialog is pressed.
+     * Validates and sets the song name in tempPostObject.
+     * @param songName The entered song name
+     */
     @Override
     public void onDialogSubmit(String songName) {
         if (!songName.isEmpty()){
-            songName.replace(" ", "");
+            songName = songName.replace(" ", "");
             if (songName.matches("^\\s*.+\\s*-\\s*.+\\s*$")){
                 String[] song = songName.split("-");
                 if (tempPostObject == null){

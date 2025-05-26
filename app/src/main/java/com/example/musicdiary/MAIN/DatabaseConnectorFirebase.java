@@ -8,27 +8,42 @@ import com.google.firebase.database.*;
 
 import java.util.*;
 
+/**
+ * Database connector for Firebase Realtime Database.
+ * Handles operations related to users, posts, and friends.
+ */
 public class DatabaseConnectorFirebase {
 
     private DatabaseReference databaseReference;
 
+    /**
+     * Constructor initializes the root database reference.
+     */
     public DatabaseConnectorFirebase() {
         databaseReference = FirebaseDatabase.getInstance().getReference();
     }
 
     // ========================== USER SETTERS ==========================
 
-    // Add or update user entry
+    /**
+     * Adds or updates a user entry with the given userID and username.
+     * @param userID Unique identifier for the user.
+     * @param username Username to add or update.
+     */
     public void addOrUpdateUser(String userID, String username) {
         UserInfo userInfo = new UserInfo(username);
         databaseReference.child("Users").child(userID).setValue(userInfo);
     }
 
-    // Change username
+    /**
+     * Changes the username for a user and optionally updates the author of posts.
+     * @param userID The user's unique ID.
+     * @param newUsername The new username to set.
+     */
     public void renameUser(String userID, String newUsername) {
         databaseReference.child("Users").child(userID).child("username").setValue(newUsername);
 
-        // Optional: auch Author in Posts anpassen
+        // Optional: also update author in Posts accordingly
         DatabaseReference postsRef = databaseReference.child("Posts").child(userID);
         postsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -49,6 +64,11 @@ public class DatabaseConnectorFirebase {
 
     public interface UserExistsCallback { void onCallback(boolean exists); }
 
+    /**
+     * Checks if a user exists by userID.
+     * @param userID The user ID to check.
+     * @param callback Callback to handle result (true if exists).
+     */
     public void userExists(final String userID, final UserExistsCallback callback) {
         databaseReference.child("Users").child(userID)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -62,9 +82,9 @@ public class DatabaseConnectorFirebase {
     public interface UsernameListCallback { void onCallback(List<String> usernames); }
 
     /**
-     * Check if a username exists.
+     * Checks if a username exists.
      * @param username The username to check.
-     * @param callback Callback returns true if username exists, false otherwise.
+     * @param callback Callback returns true if username exists.
      */
     public void usernameExists(final String username, final UserExistsCallback callback) {
         DatabaseReference usersRef = databaseReference.child("Users");
@@ -89,6 +109,12 @@ public class DatabaseConnectorFirebase {
         });
     }
 
+    /**
+     * Retrieves usernames containing a given substring.
+     * @param substring Substring to search in usernames.
+     * @param ignoreCase True to ignore case while searching.
+     * @param callback Callback returning list of matching usernames.
+     */
     public void getUsernamesContaining(final String substring, final boolean ignoreCase, final UsernameListCallback callback) {
         databaseReference.child("Users")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -113,7 +139,11 @@ public class DatabaseConnectorFirebase {
 
     public interface GetUserCallback { void onCallback(String userString, String userId); }
 
-    // Holt zu einem Username die UID (und gibt Username+UID zurück)
+    /**
+     * Gets user data (username and user ID) by username.
+     * @param username The username to look up.
+     * @param callback Callback returning username and user ID.
+     */
     public void getUserDataByName(final String username, final GetUserCallback callback) {
         databaseReference.child("Users")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -131,7 +161,11 @@ public class DatabaseConnectorFirebase {
                 });
     }
 
-    // OPTIONAL: Holt Username zu UID
+    /**
+     * Optionally gets the username by user ID.
+     * @param userID The user ID.
+     * @param callback Callback returning the username and user ID.
+     */
     public void getUsernameByID(final String userID, final GetUserCallback callback) {
         databaseReference.child("Users").child(userID)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -148,6 +182,10 @@ public class DatabaseConnectorFirebase {
 
     // ========================== USER DELETERS ==========================
 
+    /**
+     * Deletes user data, posts, and friend entries for the given user ID.
+     * @param userID The user ID to delete.
+     */
     public void deleteUser(String userID) {
         databaseReference.child("Users").child(userID).removeValue();
         databaseReference.child("Posts").child(userID).removeValue();
@@ -156,10 +194,22 @@ public class DatabaseConnectorFirebase {
 
     // ========================== POST SETTERS / GETTERS / DELETERS ==========================
 
-    public void addPost(String userID, Post post) { databaseReference.child("Posts").child(userID).push().setValue(post); }
+    /**
+     * Adds a post to the database under a user.
+     * @param userID The user ID.
+     * @param post The post to add.
+     */
+    public void addPost(String userID, Post post) {
+        databaseReference.child("Posts").child(userID).push().setValue(post);
+    }
 
     public interface PostCallback { void onCallback(Post post); }
 
+    /**
+     * Retrieves the latest post for a user.
+     * @param userID The user ID.
+     * @param callback Callback returning the post or null if none.
+     */
     public void getPostForUser(String userID, final PostCallback callback) {
         DatabaseReference postRef = databaseReference.child("Posts").child(userID);
         postRef.limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -177,22 +227,41 @@ public class DatabaseConnectorFirebase {
         });
     }
 
+    /**
+     * Deletes all posts for a user.
+     * @param UID The user ID.
+     */
     public void deleteAllPostsForUser(String UID) {
         databaseReference.child("Posts").child(UID).removeValue();
     }
 
     // ========================== FRIEND OPTIONS ==========================
 
+    /**
+     * Adds a friend entry under the current user.
+     * @param currentUserID The current user's ID.
+     * @param friendInfo FriendInfo object representing the friend.
+     */
     public void addFriend(String currentUserID, FriendInfo friendInfo) {
         databaseReference.child("Friends").child(currentUserID).child(friendInfo.getUserID()).setValue(friendInfo);
     }
 
+    /**
+     * Removes a friend from the current user's friend list.
+     * @param currentUserID The current user's ID.
+     * @param friendUserID The friend's user ID to remove.
+     */
     public void removeFriend(String currentUserID, String friendUserID) {
         databaseReference.child("Friends").child(currentUserID).child(friendUserID).removeValue();
     }
 
     public interface FriendListCallback { void onCallback(Map<String, FriendInfo> friends); }
 
+    /**
+     * Retrieves the friend list of the current user.
+     * @param currentUserID The current user's ID.
+     * @param callback Callback returning a map of friend IDs to FriendInfo.
+     */
     public void getFriendList(String currentUserID, final FriendListCallback callback) {
         databaseReference.child("Friends").child(currentUserID)
                 .addListenerForSingleValueEvent(new ValueEventListener() {

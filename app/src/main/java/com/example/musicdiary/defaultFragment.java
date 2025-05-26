@@ -9,10 +9,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+/**
+ * Default empty fragment used as a placeholder or fallback.
+ */
 public class defaultFragment extends Fragment {
 
+    /**
+     * Default constructor.
+     */
     public defaultFragment(){
-        //Empty
+        // Empty
     }
 
     @Override
@@ -23,6 +29,7 @@ public class defaultFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // Inflate the default empty layout
         View view = inflater.inflate(R.layout.default_empty, container, false);
 
         return view;
