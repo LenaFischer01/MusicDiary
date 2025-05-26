@@ -19,9 +19,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:tabSelectedTextColor="@color/colorAccent"
+        app:tabSelectedTextColor="?attr/colorAccent"
         tools:layout_editor_absoluteX="16dp"
-        app:tabIndicatorColor="@color/colorAccent">
+        app:tabIndicatorColor="?attr/colorAccent">
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tab_existing_friends"

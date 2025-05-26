@@ -1,7 +1,7 @@
 <resources>
     <!-- Style for buttons -->
     <style name="Widget.App.CustomButton" parent="Widget.MaterialComponents.Button">
-        <item name="backgroundTint">@color/colorAccent</item>
+        <item name="backgroundTint">?attr/colorAccent</item>
         <item name="cornerRadius">16dp</item>
         <item name="elevation">8dp</item>
         <item name="android:textColor">@android:color/white</item>

@@ -8,6 +8,7 @@ public class SharedPreferencesHelper {
     private static final String KEY_USERID = "userID";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_LAST_UPLOAD = "uploadDate";
+    private static final String THEME = "Theme";
     private SharedPreferences sharedPreferences;
 
     /**UserData = PREFS_NAME*/
@@ -51,6 +52,16 @@ public class SharedPreferencesHelper {
      */
     public String getUserID() {
         return sharedPreferences.getString(KEY_USERID, null);
+    }
+
+    public String getTheme(){
+        return sharedPreferences.getString(THEME, "AppTheme.Blue");
+    }
+
+    public void setTheme(String Theme){
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(THEME, Theme);
+        editor.apply();
     }
 
 

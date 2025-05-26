@@ -80,7 +80,7 @@ public class ChooseSongDialogFragment extends DialogFragment {
         super.onStart();
         AlertDialog dialog = (AlertDialog) getDialog();
         if (dialog != null) {
-            int color = ContextCompat.getColor(requireContext(), R.color.colorAccent);
+            int color = ContextCompat.getColor(requireContext(), R.color.colorAccentBlue);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(color);
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(color);
         }

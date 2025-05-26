@@ -3,7 +3,15 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="accentGrey">#424242</color>
-    <color name="colorAccent">#196DB1</color>
+
+    <color name="colorAccentBlue">#196DB1</color>
+
+    <color name="colorAccentRed">#B8401A</color>
+
+    <color name="colorAccentGreen">#69BD54</color>
+
+    <color name="colorAccentPurple">#7B3EC1</color>
+
 
     <color name="backgroundElement">#EDEDED</color>
 </resources>

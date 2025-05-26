@@ -18,6 +18,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferencesHelper helper = new SharedPreferencesHelper(getApplicationContext());
+
+        String themeName = helper.getTheme();
+        if (themeName == null){
+            themeName = "AppTheme.Blue";
+        }
+
+        setTheme(getResources().getIdentifier(themeName, "style", getPackageName()));
+
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
@@ -52,8 +61,9 @@ public class MainActivity extends AppCompatActivity {
                 }).attach();
 
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
-        SharedPreferencesHelper helper = new SharedPreferencesHelper(getApplicationContext());
         String myUserID = UserIDManager.getOrGenerateUserID(getApplicationContext());
+
+
 
         // Check if userID exists in DB, if not, add User in DB and SharedPreferences
         databaseConnectorFirebase.userExists(myUserID, new DatabaseConnectorFirebase.UserExistsCallback() {
@@ -65,5 +75,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+
     }
 }
