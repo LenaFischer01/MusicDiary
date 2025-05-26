@@ -29,12 +29,16 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.time.LocalDate;
 
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 import java.util.List;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Fragment displaying the feed with posts from friends and self.
@@ -119,11 +123,50 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                 });
 
                 // Adds FriendPostObjects to the friend list for all posts in the database
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+                LocalDate limitDate = LocalDate.now().minusDays(2);
+
                 for (FriendInfo friend : friendInfoSet){
                     connectorFirebase.getPostForUser(friend.getUserID(), post -> {
                         if (post != null && post.getPostContent() != null){
+
+                            // Extract the Date from the Post
+                            String postContent = post.getPostContent();
+                            if (postContent.length() < 10) {
+                                // Ignore post, syntax incorrect
+                                if (counter.incrementAndGet() == total){
+                                    recyclerViewAdapter.notifyDataSetChanged();
+                                    noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.GONE);
+                                }
+                                return;
+                            }
+
+                            String dateString = postContent.substring(0, 10);
+                            LocalDate postDate;
+                            try {
+                                postDate = LocalDate.parse(dateString, formatter);
+                            } catch (Exception e) {
+                                // Incorrect Date
+                                if (counter.incrementAndGet() == total){
+                                    recyclerViewAdapter.notifyDataSetChanged();
+                                    noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.GONE);
+                                }
+                                return;
+                            }
+
+                            if (postDate.isBefore(limitDate)) {
+                                // Post older than 2 days -> Ignore
+                                if (counter.incrementAndGet() == total){
+                                    recyclerViewAdapter.notifyDataSetChanged();
+                                    noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.GONE);
+                                }
+                                return;
+                            }
+
+                            // Add Post
                             friendlist.add(new FriendPostObject(friend.getUsername(), post));
                         }
+
                         if (counter.incrementAndGet() == total){
                             recyclerViewAdapter.notifyDataSetChanged();
                             noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.GONE);

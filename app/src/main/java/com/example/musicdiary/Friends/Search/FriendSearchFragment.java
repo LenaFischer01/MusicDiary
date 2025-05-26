@@ -26,6 +26,7 @@ import java.util.List;
 
 import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
+import android.util.Log;
 
 /**
  * Fragment to search for friends by username substring.
@@ -120,6 +121,9 @@ public class FriendSearchFragment extends Fragment {
         refreshData();
 
         databaseConnectorFirebase.getUsernamesContaining(substring, true, usernames -> {
+            Log.d("Test", "Gefundene Usernames: " + usernames.size());
+            for (String name : usernames) Log.d("Test", "Ergebnis: " + name);
+
             if (usernames.isEmpty()) {
                 noResultText.setVisibility(View.VISIBLE);
                 results.clear();

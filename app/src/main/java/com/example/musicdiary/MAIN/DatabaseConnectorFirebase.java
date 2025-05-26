@@ -1,5 +1,8 @@
 package com.example.musicdiary.MAIN;
 
+import android.util.Log;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import com.example.musicdiary.Container.FriendInfo;
 import com.example.musicdiary.Container.Post;
@@ -93,8 +96,8 @@ public class DatabaseConnectorFirebase {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean exists = false;
                 for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                    String existingUsername = userSnapshot.getValue(String.class);
-                    if (existingUsername != null && existingUsername.equals(username)) {
+                    UserInfo user = userSnapshot.getValue(UserInfo.class);
+                    if (user != null && user.getUsername().equals(username)) {
                         exists = true;
                         break;
                     }
@@ -104,6 +107,7 @@ public class DatabaseConnectorFirebase {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                Log.e("Firebase", "onCancelled: " + databaseError.getMessage());
                 callback.onCallback(false);
             }
         });
@@ -124,6 +128,7 @@ public class DatabaseConnectorFirebase {
                             UserInfo user = userSnapshot.getValue(UserInfo.class);
                             if (user != null && user.getUsername() != null) {
                                 String username = user.getUsername();
+                                Log.d("Test", "Prüfe UserSnapshot: " + user); // <- Sollte nicht null
                                 if (ignoreCase) {
                                     if (username.toLowerCase().contains(substring.toLowerCase())) matches.add(username);
                                 } else {
