@@ -18,8 +18,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.musicdiary.Container.FriendInfo;
-import com.example.musicdiary.Container.FriendPostObject;
+import com.example.musicdiary.Container.FollowingInfo;
+import com.example.musicdiary.Container.FollowingPostObject;
 import com.example.musicdiary.Container.Post;
 import com.example.musicdiary.MAIN.DatabaseConnectorFirebase;
 import com.example.musicdiary.R;
@@ -29,16 +29,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.time.LocalDate;
 
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 import java.util.List;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Fragment displaying the feed with posts from friends and self.
@@ -46,7 +42,7 @@ import java.util.regex.Pattern;
 public class FeedFragment extends Fragment implements ChooseSongDialogFragment.ChooseSongDialogListener{
 
     FeedRecyclerViewAdapter recyclerViewAdapter;
-    List<FriendPostObject> friendlist = new ArrayList<>();
+    List<FollowingPostObject> friendlist = new ArrayList<>();
     TextView noPostText;
     private Post tempPostObject;
     private TextView displaySong;
@@ -98,23 +94,23 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
         DatabaseConnectorFirebase connectorFirebase = new DatabaseConnectorFirebase();
-        List<FriendInfo> friendInfoSet = new ArrayList<>();
+        List<FollowingInfo> followingInfoSet = new ArrayList<>();
 
         connectorFirebase.getFriendList(FirebaseAuth.getInstance().getCurrentUser().getUid(), new DatabaseConnectorFirebase.FriendListCallback() {
             @Override
-            public void onCallback(Map<String, FriendInfo> friends) {
+            public void onCallback(Map<String, FollowingInfo> friends) {
 
-                friendInfoSet.addAll(friends.values());
+                followingInfoSet.addAll(friends.values());
 
                 String myUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
                 AtomicInteger counter = new AtomicInteger(0);
-                int total = friendInfoSet.size() + 1; // friends + user
+                int total = followingInfoSet.size() + 1; // friends + user
 
                 // Get user post
                 connectorFirebase.getPostForUser(myUserID, post -> {
                     if (post != null && post.getPostContent() != null) {
-                        friendlist.add(new FriendPostObject(helper.getName(), post));
+                        friendlist.add(new FollowingPostObject(helper.getName(), post));
                     }
                     if (counter.incrementAndGet() == total) {
                         recyclerViewAdapter.notifyDataSetChanged();
@@ -126,7 +122,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
                 LocalDate limitDate = LocalDate.now().minusDays(2);
 
-                for (FriendInfo friend : friendInfoSet){
+                for (FollowingInfo friend : followingInfoSet){
                     connectorFirebase.getPostForUser(friend.getUserID(), post -> {
                         if (post != null && post.getPostContent() != null){
 
@@ -164,7 +160,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                             }
 
                             // Add Post
-                            friendlist.add(new FriendPostObject(friend.getUsername(), post));
+                            friendlist.add(new FollowingPostObject(friend.getUsername(), post));
                         }
 
                         if (counter.incrementAndGet() == total){
@@ -331,7 +327,7 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
     @Override
     public void onDialogSubmit(String songName) {
         if (!songName.isEmpty()){
-            songName = songName.replace(" ", "");
+            songName = songName.strip().replace("  ", " ");
             if (songName.matches("^\\s*.+\\s*-\\s*.+\\s*$")){
                 String[] song = songName.split("-");
                 if (tempPostObject == null){

@@ -1,10 +1,9 @@
 package com.example.musicdiary.MAIN;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import com.example.musicdiary.Container.FriendInfo;
+import com.example.musicdiary.Container.FollowingInfo;
 import com.example.musicdiary.Container.Post;
 import com.example.musicdiary.Container.UserInfo;
 import com.google.firebase.database.*;
@@ -245,10 +244,10 @@ public class DatabaseConnectorFirebase {
     /**
      * Adds a friend entry under the current user.
      * @param currentUserID The current user's ID.
-     * @param friendInfo FriendInfo object representing the friend.
+     * @param followingInfo FriendInfo object representing the friend.
      */
-    public void addFriend(String currentUserID, FriendInfo friendInfo) {
-        databaseReference.child("Friends").child(currentUserID).child(friendInfo.getUserID()).setValue(friendInfo);
+    public void addFriend(String currentUserID, FollowingInfo followingInfo) {
+        databaseReference.child("Friends").child(currentUserID).child(followingInfo.getUserID()).setValue(followingInfo);
     }
 
     /**
@@ -260,7 +259,7 @@ public class DatabaseConnectorFirebase {
         databaseReference.child("Friends").child(currentUserID).child(friendUserID).removeValue();
     }
 
-    public interface FriendListCallback { void onCallback(Map<String, FriendInfo> friends); }
+    public interface FriendListCallback { void onCallback(Map<String, FollowingInfo> friends); }
 
     /**
      * Retrieves the friend list of the current user.
@@ -271,11 +270,11 @@ public class DatabaseConnectorFirebase {
         databaseReference.child("Friends").child(currentUserID)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        Map<String, FriendInfo> friendMap = new HashMap<>();
+                        Map<String, FollowingInfo> friendMap = new HashMap<>();
                         for (DataSnapshot friendSnapshot : snapshot.getChildren()) {
-                            FriendInfo friendInfo = friendSnapshot.getValue(FriendInfo.class);
-                            if (friendInfo != null)
-                                friendMap.put(friendSnapshot.getKey(), friendInfo);
+                            FollowingInfo followingInfo = friendSnapshot.getValue(FollowingInfo.class);
+                            if (followingInfo != null)
+                                friendMap.put(friendSnapshot.getKey(), followingInfo);
                         }
                         callback.onCallback(friendMap);
                     }

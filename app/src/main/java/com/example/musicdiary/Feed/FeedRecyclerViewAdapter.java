@@ -8,7 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.musicdiary.Container.FriendPostObject;
+import com.example.musicdiary.Container.FollowingPostObject;
 import com.example.musicdiary.R;
 
 import java.util.List;
@@ -18,13 +18,13 @@ import java.util.List;
  */
 public class FeedRecyclerViewAdapter extends RecyclerView.Adapter<FeedRecyclerViewAdapter.EntryViewHolder>{
 
-    private List<FriendPostObject> items;
+    private List<FollowingPostObject> items;
 
     /**
      * Constructor to initialize adapter with a list of FriendPostObject items.
      * @param items List of FriendPostObject to display
      */
-    public FeedRecyclerViewAdapter(List<FriendPostObject> items){
+    public FeedRecyclerViewAdapter(List<FollowingPostObject> items){
         this.items = items;
     }
 
@@ -32,14 +32,14 @@ public class FeedRecyclerViewAdapter extends RecyclerView.Adapter<FeedRecyclerVi
     @Override
     public EntryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Inflate the layout for a single friend post item
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friendpost, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.followingpost, parent, false);
         return new EntryViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull EntryViewHolder holder, int position) {
         // Bind data from FriendPostObject to the views
-        FriendPostObject friend = items.get(position);
+        FollowingPostObject friend = items.get(position);
 
         holder.viewFriendsName.setText(friend.getTodaysPost().getAuthor());
         holder.viewFriendspost.setText(friend.getTodaysPost().getPostContent());

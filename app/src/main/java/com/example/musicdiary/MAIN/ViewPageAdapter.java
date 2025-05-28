@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.musicdiary.Feed.FeedFragment;
-import com.example.musicdiary.Friends.FriendsFragment;
+import com.example.musicdiary.Following.FollowingFragment;
 import com.example.musicdiary.Settings.SettingsFragment;
 
 /**
@@ -34,7 +34,7 @@ public class ViewPageAdapter extends FragmentStateAdapter {
             case 0:
                 return new FeedFragment();
             case 1:
-                return new FriendsFragment();
+                return new FollowingFragment();
             case 2:
                 return new SettingsFragment();
             default:
