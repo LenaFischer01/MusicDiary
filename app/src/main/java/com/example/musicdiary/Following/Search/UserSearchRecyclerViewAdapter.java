@@ -86,6 +86,7 @@ public class UserSearchRecyclerViewAdapter extends RecyclerView.Adapter<UserSear
 
                             // Add the friend using the database connector
                             databaseConnectorFirebase.addFriend(FirebaseAuth.getInstance().getCurrentUser().getUid(), info);
+                            databaseConnectorFirebase.addFollower(FirebaseAuth.getInstance().getCurrentUser().getUid(), info.getUserID());
                         }
                     }
                 });

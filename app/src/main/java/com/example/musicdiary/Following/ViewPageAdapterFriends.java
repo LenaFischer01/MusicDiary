@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import com.example.musicdiary.Following.Follower.FollowerFragment;
 import com.example.musicdiary.Following.Overview.FollowingOverviewFragment;
 import com.example.musicdiary.Following.Search.UserSearchFragment;
 import com.example.musicdiary.defaultFragment;
@@ -35,8 +36,8 @@ public class ViewPageAdapterFriends extends FragmentStateAdapter {
                 return new FollowingOverviewFragment();
             case 1:
                 return new UserSearchFragment();
-            // case 2:
-            //     return new friendrequestFragment();
+             case 2:
+                 return new FollowerFragment();
             default:
                 return new defaultFragment();
         }
@@ -48,6 +49,6 @@ public class ViewPageAdapterFriends extends FragmentStateAdapter {
      */
     @Override
     public int getItemCount() {
-        return 2;
+        return 3;
     }
 }

@@ -15,11 +15,12 @@
         android:textSize="16sp"
         android:background="@drawable/rounded_layout_background"
         android:padding="8dp"
+        android:layout_marginBottom="16dp"
         />
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewFriendRequests"
+        android:id="@+id/recyclerViewFollower"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

@@ -283,4 +283,67 @@ public class DatabaseConnectorFirebase {
                     }
                 });
     }
+
+    // -------------------------------- FOLLOWER METHODS -------------------------------------------
+
+    /**
+     * Sets a user as a Follower to another user.
+     * @param ownUserId The ID, og the one who is now following
+     * @param userID The ID of the one being followed
+     * */
+    public void addFollower(String ownUserId, String userID){
+        databaseReference.child("Users").child(userID).child("Follower").child(ownUserId).setValue(ownUserId);
+    }
+
+    /**
+     * Retrieves the list of followers for the specified user as a mapping from UID to username.
+     * For each follower, fetches the username by their UID using the getUsernameByID method.
+     * The results are returned asynchronously to the given callback. If there are no followers,
+     * an empty map is returned immediately.
+     *
+     * @param userID   The UID of the user whose follower list is requested.
+     * @param callback A callback interface to receive the resulting Map of UID -> Username.
+     */
+    public void getFollowersWithUsername(String userID, final FollowerNameListCallback callback) {
+        databaseReference.child("Users").child(userID).child("Follower")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        final Map<String, String> uidToName = new HashMap<>();
+                        final List<String> followerUIDs = new ArrayList<>();
+                        for (DataSnapshot child : snapshot.getChildren()) {
+                            followerUIDs.add(child.getKey());
+                        }
+
+                        if (followerUIDs.isEmpty()) {
+                            callback.onCallback(uidToName);
+                            return;
+                        }
+
+                        // Counter to wait for all responses
+                        final int[] counter = {0};
+                        for (final String followerUid : followerUIDs) {
+                            getUsernameByID(followerUid, new GetUserCallback() {
+                                @Override
+                                public void onCallback(String username, String uid) {
+                                    uidToName.put(uid, username);
+                                    counter[0]++;
+                                    if (counter[0] == followerUIDs.size()) {
+
+                                        callback.onCallback(uidToName);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        callback.onCallback(new HashMap<>());
+                    }
+                });
+    }
+
+    public interface FollowerNameListCallback {
+        void onCallback(Map<String, String> uidToName);
+    }
 }
