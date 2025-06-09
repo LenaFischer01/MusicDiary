@@ -77,11 +77,13 @@ public class FollowingOverviewFragment extends Fragment implements StopFollowing
      */
     private void refreshData() {
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
-        databaseConnectorFirebase.getFriendList(UID, friends -> {
+        databaseConnectorFirebase.getFriendInfoList(UID, friends -> {
             friendsList.clear();
+
             if (friends != null) {
                 friendsList.addAll(friends.values());
             }
+
             adapter.notifyDataSetChanged();
 
             // Show or hide "no friends" message based on the list content

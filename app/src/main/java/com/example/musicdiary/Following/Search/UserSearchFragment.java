@@ -121,8 +121,6 @@ public class UserSearchFragment extends Fragment {
         refreshData();
 
         databaseConnectorFirebase.getUsernamesContaining(substring, true, usernames -> {
-            Log.d("Test", "Gefundene Usernames: " + usernames.size());
-            for (String name : usernames) Log.d("Test", "Ergebnis: " + name);
 
             if (usernames.isEmpty()) {
                 noResultText.setVisibility(View.VISIBLE);
@@ -141,7 +139,7 @@ public class UserSearchFragment extends Fragment {
                 databaseConnectorFirebase.getUserDataByName(matchedUsername, (username, uid) -> {
                     // Do not show the user's own account
                     if (!uid.equals(myUid) && !uid.isEmpty() && !username.isEmpty()) {
-                        tempResults.add(new FollowingInfo(uid, username, currentDate.format(formatter)));
+                        tempResults.add(new FollowingInfo(uid, currentDate.format(formatter)));
                     }
                     done[0]++;
                     if (done[0] == expected) {

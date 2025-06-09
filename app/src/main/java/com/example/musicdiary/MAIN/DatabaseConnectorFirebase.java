@@ -63,25 +63,25 @@ public class DatabaseConnectorFirebase {
         });
 
         // 3. In all friends
-        DatabaseReference friendsRef = databaseReference.child("Friends");
-        friendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                for (DataSnapshot userFriendsSnapshot : snapshot.getChildren()) {
-                    String otherUserId = userFriendsSnapshot.getKey();
-                    DataSnapshot friendSnapshot = userFriendsSnapshot.child(userID);
-                    if (friendSnapshot.exists()) {
-                        FollowingInfo followingInfo = friendSnapshot.getValue(FollowingInfo.class);
-                        if (followingInfo != null) {
-                            followingInfo.setUsername(newUsername);
-                            // Change Name
-                            friendSnapshot.getRef().setValue(followingInfo);
-                        }
-                    }
-                }
-            }
-            @Override public void onCancelled(DatabaseError error) { }
-        });
+//        DatabaseReference friendsRef = databaseReference.child("Friends");
+//        friendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot snapshot) {
+//                for (DataSnapshot userFriendsSnapshot : snapshot.getChildren()) {
+//                    String otherUserId = userFriendsSnapshot.getKey();
+//                    DataSnapshot friendSnapshot = userFriendsSnapshot.child(userID);
+//                    if (friendSnapshot.exists()) {
+//                        FollowingInfo followingInfo = friendSnapshot.getValue(FollowingInfo.class);
+//                        if (followingInfo != null) {
+//                            followingInfo.setUsername(newUsername);
+//                            // Change Name
+//                            friendSnapshot.getRef().setValue(followingInfo);
+//                        }
+//                    }
+//                }
+//            }
+//            @Override public void onCancelled(DatabaseError error) { }
+//        });
     }
 
     // ========================== USER GETTERS ==========================
@@ -266,10 +266,10 @@ public class DatabaseConnectorFirebase {
     /**
      * Adds a friend entry under the current user.
      * @param currentUserID The current user's ID.
-     * @param followingInfo FriendInfo object representing the friend.
      */
-    public void addFriend(String currentUserID, FollowingInfo followingInfo) {
-        databaseReference.child("Friends").child(currentUserID).child(followingInfo.getUserID()).setValue(followingInfo);
+    public void addFriend(String currentUserID, String friendUserID, String sinceTimestamp) {
+        FollowingInfo info = new FollowingInfo(friendUserID, sinceTimestamp);
+        databaseReference.child("Friends").child(currentUserID).child(friendUserID).setValue(info);
     }
 
     /**
@@ -281,17 +281,67 @@ public class DatabaseConnectorFirebase {
         databaseReference.child("Friends").child(currentUserID).child(friendUserID).removeValue();
     }
 
-    public interface FriendListCallback { void onCallback(Map<String, FollowingInfo> friends); }
+    public interface FriendListCallback {
+        void onCallback(Map<String, String> uidToName); // UID, Username
+    }
 
-    /**
-     * Retrieves the friend list of the current user.
-     * @param currentUserID The current user's ID.
-     * @param callback Callback returning a map of friend IDs to FriendInfo.
-     */
     public void getFriendList(String currentUserID, final FriendListCallback callback) {
+        DatabaseReference friendsRef = databaseReference.child("Friends").child(currentUserID);
+        friendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                final Map<String, String> uidToName = new HashMap<>();
+                final List<String> friendUIDs = new ArrayList<>();
+
+                for (DataSnapshot friendSnapshot : snapshot.getChildren()) {
+                    String friendUID = friendSnapshot.getKey();
+                    friendUIDs.add(friendUID);
+                }
+
+                if (friendUIDs.isEmpty()) {
+                    callback.onCallback(uidToName);
+                    return;
+                }
+
+                // Hole für jede FriendUID den username asynchron
+                final int[] counter = {0};
+                for (final String friendUid : friendUIDs) {
+                    databaseReference.child("Users").child(friendUid).child("username")
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    String username = dataSnapshot.getValue(String.class);
+                                    if (username == null) username = "";
+                                    uidToName.put(friendUid, username);
+                                    counter[0]++;
+                                    if (counter[0] == friendUIDs.size()) {
+                                        callback.onCallback(uidToName);
+                                    }
+                                }
+                                @Override
+                                public void onCancelled(DatabaseError error) {
+                                    uidToName.put(friendUid, "");
+                                    counter[0]++;
+                                    if (counter[0] == friendUIDs.size()) {
+                                        callback.onCallback(uidToName);
+                                    }
+                                }
+                            });
+                }
+            }
+            @Override public void onCancelled(DatabaseError error) { callback.onCallback(new HashMap<>()); }
+        });
+    }
+
+    public interface FriendInfoListCallback {
+        void onCallback(Map<String, FollowingInfo> friends); // Key: UID, Value: FollowingInfo-Objekt
+    }
+
+    public void getFriendInfoList(String currentUserID, final FriendInfoListCallback callback) {
         databaseReference.child("Friends").child(currentUserID)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
                         Map<String, FollowingInfo> friendMap = new HashMap<>();
                         for (DataSnapshot friendSnapshot : snapshot.getChildren()) {
                             FollowingInfo followingInfo = friendSnapshot.getValue(FollowingInfo.class);
@@ -300,7 +350,9 @@ public class DatabaseConnectorFirebase {
                         }
                         callback.onCallback(friendMap);
                     }
-                    @Override public void onCancelled(@NonNull DatabaseError error) {
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
                         callback.onCallback(new HashMap<>());
                     }
                 });

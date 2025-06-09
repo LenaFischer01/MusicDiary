@@ -51,12 +51,18 @@ public class UserSearchRecyclerViewAdapter extends RecyclerView.Adapter<UserSear
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
 
         FollowingInfo info = items.get(position);
-        holder.viewFriendName.setText(info.getUsername());
+        holder.viewFriendName.setText("...loading...");
 
-        // Check if the user is already a friend to update the button state
+        // Username anzeigen
+        databaseConnectorFirebase.getUsernameByID(
+                info.getUserID(),
+                (username, userId) -> holder.viewFriendName.setText(username)
+        );
+
+        // Prüfe, ob schon Freund (über die UID)
         databaseConnectorFirebase.getFriendList(UID, new DatabaseConnectorFirebase.FriendListCallback() {
             @Override
-            public void onCallback(Map<String, FollowingInfo> friends) {
+            public void onCallback(Map<String, String> friends) {
                 if (friends.containsKey(info.getUserID())) {
                     holder.addFriend.setText("Added");
                     holder.addFriend.setEnabled(false);
@@ -70,26 +76,32 @@ public class UserSearchRecyclerViewAdapter extends RecyclerView.Adapter<UserSear
         holder.addFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                databaseConnectorFirebase.getFriendList(FirebaseAuth.getInstance().getCurrentUser().getUid(), new DatabaseConnectorFirebase.FriendListCallback() {
-                    @Override
-                    public void onCallback(Map<String, FollowingInfo> friends) {
-                        if (friends.containsKey(info.getUserID())){
-                            Toast.makeText(v.getContext(), "You are already friends!", Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            Toast.makeText(v.getContext(), "Added!", Toast.LENGTH_SHORT).show();
-                            holder.addFriend.setText("Added");
-                            holder.addFriend.setEnabled(false);
+                databaseConnectorFirebase.getFriendList(
+                        FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                        new DatabaseConnectorFirebase.FriendListCallback() {
+                            @Override
+                            public void onCallback(Map<String, String> friends) {
+                                if (friends.containsKey(info.getUserID())){
+                                    Toast.makeText(v.getContext(), "You are already friends!", Toast.LENGTH_SHORT).show();
+                                }
+                                else {
+                                    Toast.makeText(v.getContext(), "Added!", Toast.LENGTH_SHORT).show();
+                                    holder.addFriend.setText("Added");
+                                    holder.addFriend.setEnabled(false);
+                                    String since = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
 
-                            // Record the current date as the friendship start date
-                            info.setSinceTimestamp(LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-
-                            // Add the friend using the database connector
-                            databaseConnectorFirebase.addFriend(FirebaseAuth.getInstance().getCurrentUser().getUid(), info);
-                            databaseConnectorFirebase.addFollower(FirebaseAuth.getInstance().getCurrentUser().getUid(), info.getUserID());
+                                    databaseConnectorFirebase.addFriend(
+                                            FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                            info.getUserID(),
+                                            since
+                                    );
+                                    databaseConnectorFirebase.addFollower(
+                                            FirebaseAuth.getInstance().getCurrentUser().getUid(), info.getUserID()
+                                    );
+                                }
+                            }
                         }
-                    }
-                });
+                );
             }
         });
     }

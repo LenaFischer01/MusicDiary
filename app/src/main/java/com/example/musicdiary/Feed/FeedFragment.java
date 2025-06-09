@@ -94,20 +94,18 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
 
         SharedPreferencesHelper helper = new SharedPreferencesHelper(getContext());
         DatabaseConnectorFirebase connectorFirebase = new DatabaseConnectorFirebase();
-        List<FollowingInfo> followingInfoSet = new ArrayList<>();
 
-        connectorFirebase.getFriendList(FirebaseAuth.getInstance().getCurrentUser().getUid(), new DatabaseConnectorFirebase.FriendListCallback() {
+        String myUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        // Get list of people one is following
+        connectorFirebase.getFriendList(myUserID, new DatabaseConnectorFirebase.FriendListCallback() {
             @Override
-            public void onCallback(Map<String, FollowingInfo> friends) {
-
-                followingInfoSet.addAll(friends.values());
-
-                String myUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
+            public void onCallback(Map<String, String> uidToName) {
+                // refresh own data
                 AtomicInteger counter = new AtomicInteger(0);
-                int total = followingInfoSet.size() + 1; // friends + user
+                int total = uidToName.size() + 1; // Following + oneself
 
-                // Get user post
+                // own post
                 connectorFirebase.getPostForUser(myUserID, post -> {
                     if (post != null && post.getPostContent() != null) {
                         friendlist.add(new FollowingPostObject(helper.getName(), post));
@@ -118,18 +116,20 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                     }
                 });
 
-                // Adds FriendPostObjects to the friend list for all posts in the database
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
                 LocalDate limitDate = LocalDate.now().minusDays(2);
 
-                for (FollowingInfo friend : followingInfoSet){
-                    connectorFirebase.getPostForUser(friend.getUserID(), post -> {
-                        if (post != null && post.getPostContent() != null){
+                // Get username and Post for every friend
+                for (Map.Entry<String, String> entry : uidToName.entrySet()) {
+                    final String friendUID = entry.getKey();
+                    final String username = entry.getValue();
+
+                    connectorFirebase.getPostForUser(friendUID, post -> {
+                        if (post != null && post.getPostContent() != null) {
 
                             // Extract the Date from the Post
                             String postContent = post.getPostContent();
                             if (postContent.length() < 10) {
-                                // Ignore post, syntax incorrect
                                 if (counter.incrementAndGet() == total){
                                     recyclerViewAdapter.notifyDataSetChanged();
                                     noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.GONE);
@@ -142,7 +142,6 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                             try {
                                 postDate = LocalDate.parse(dateString, formatter);
                             } catch (Exception e) {
-                                // Incorrect Date
                                 if (counter.incrementAndGet() == total){
                                     recyclerViewAdapter.notifyDataSetChanged();
                                     noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.GONE);
@@ -151,7 +150,6 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                             }
 
                             if (postDate.isBefore(limitDate)) {
-                                // Post older than 2 days -> Ignore
                                 if (counter.incrementAndGet() == total){
                                     recyclerViewAdapter.notifyDataSetChanged();
                                     noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.GONE);
@@ -159,10 +157,9 @@ public class FeedFragment extends Fragment implements ChooseSongDialogFragment.C
                                 return;
                             }
 
-                            // Add Post
-                            friendlist.add(new FollowingPostObject(friend.getUsername(), post));
+                            // Add Post-Object (username from Map)
+                            friendlist.add(new FollowingPostObject(username, post));
                         }
-
                         if (counter.incrementAndGet() == total){
                             recyclerViewAdapter.notifyDataSetChanged();
                             noPostText.setVisibility(friendlist.isEmpty() ? View.VISIBLE : View.GONE);

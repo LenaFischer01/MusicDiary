@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicdiary.Container.FollowingInfo;
+import com.example.musicdiary.MAIN.DatabaseConnectorFirebase;
 import com.example.musicdiary.R;
 
 import java.util.List;
@@ -51,9 +52,16 @@ public class FollowingOverviewRecyclerViewAdapter extends RecyclerView.Adapter<F
     public void onBindViewHolder(@NonNull EntryViewHolder holder, int position) {
         // Bind friend data to the viewholder
         FollowingInfo info = items.get(position);
-
-        holder.friendname.setText(info.getUsername());
         holder.friendsSince.setText(info.getSinceTimestamp());
+
+        DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
+
+        db.getUsernameByID(info.getUserID(), new DatabaseConnectorFirebase.GetUserCallback() {
+            @Override
+            public void onCallback(String userString, String userId) {
+                holder.friendname.setText(userString);
+            }
+        });
 
         holder.removeFriend.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -5,18 +5,15 @@ package com.example.musicdiary.Container;
  */
 public class FollowingInfo {
     private String userID;
-    private String username;
     private String sinceTimestamp;
 
     /**
      * Constructor with parameters to initialize all fields.
      * @param userID Unique identifier of the user
-     * @param username Username of the friend
      * @param sinceTimestamp Timestamp indicating since when the friendship exists
      */
-    public FollowingInfo(String userID, String username, String sinceTimestamp) {
+    public FollowingInfo(String userID, String sinceTimestamp) {
         this.userID = userID;
-        this.username = username;
         this.sinceTimestamp = sinceTimestamp;
     }
 
@@ -27,7 +24,7 @@ public class FollowingInfo {
         // Empty constructor, otherwise the app always crashes...
     }
 
-    // Getter and setter methods for userID, username and sinceTimestamp
+    // Getter and setter methods for userID and sinceTimestamp
 
     public String getUserID() {
         return userID;
@@ -35,14 +32,6 @@ public class FollowingInfo {
 
     public void setUserID(String userID) {
         this.userID = userID;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getSinceTimestamp() {
