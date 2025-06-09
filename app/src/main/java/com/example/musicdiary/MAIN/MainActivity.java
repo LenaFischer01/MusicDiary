@@ -70,11 +70,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize user entry in database if logged in
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
         if (user != null) {
             String uid = user.getUid();
-            String username = user.getDisplayName();
-            initialiseUserInDB(uid, username);
-            helper.setName(username);
+            db.getUsernameByID(uid, (userString, userId) -> {
+                initialiseUserInDB(uid, userString);
+                helper.setName(userString);
+
+            });
         }
     }
 

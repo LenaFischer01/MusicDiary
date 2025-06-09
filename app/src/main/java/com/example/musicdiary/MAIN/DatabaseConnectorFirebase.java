@@ -38,14 +38,15 @@ public class DatabaseConnectorFirebase {
     }
 
     /**
-     * Changes the username for a user and optionally updates the author of posts.
+     * Changes the username for a user and updates all occurrences in the database.
      * @param userID The user's unique ID.
      * @param newUsername The new username to set.
      */
-    public void renameUser(String userID, String newUsername) {
+    public void renameUser(final String userID, final String newUsername) {
+        // 1. Own Username in Profile
         databaseReference.child("Users").child(userID).child("username").setValue(newUsername);
 
-        // Optional: also update author in Posts accordingly
+        // 2. All own Posts
         DatabaseReference postsRef = databaseReference.child("Posts").child(userID);
         postsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -55,6 +56,27 @@ public class DatabaseConnectorFirebase {
                     if (post != null) {
                         post.setAuthor(newUsername);
                         postSnapshot.getRef().setValue(post);
+                    }
+                }
+            }
+            @Override public void onCancelled(DatabaseError error) { }
+        });
+
+        // 3. In all friends
+        DatabaseReference friendsRef = databaseReference.child("Friends");
+        friendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot userFriendsSnapshot : snapshot.getChildren()) {
+                    String otherUserId = userFriendsSnapshot.getKey();
+                    DataSnapshot friendSnapshot = userFriendsSnapshot.child(userID);
+                    if (friendSnapshot.exists()) {
+                        FollowingInfo followingInfo = friendSnapshot.getValue(FollowingInfo.class);
+                        if (followingInfo != null) {
+                            followingInfo.setUsername(newUsername);
+                            // Change Name
+                            friendSnapshot.getRef().setValue(followingInfo);
+                        }
                     }
                 }
             }

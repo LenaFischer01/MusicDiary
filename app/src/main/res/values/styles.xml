@@ -1,10 +1,16 @@
 <resources>
     <!-- Style for buttons -->
     <style name="Widget.App.CustomButton" parent="Widget.MaterialComponents.Button">
-        <item name="backgroundTint">?attr/colorAccent</item>
-        <item name="cornerRadius">16dp</item>
-        <item name="elevation">8dp</item>
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:padding">12dp</item>
+        <item name="backgroundTint">@color/backgroundElement</item>
+        <item name="cornerRadius">20dp</item>
+
+        <item name="elevation">6dp</item>
+        <item name="android:stateListAnimator">@animator/button_elevation_animator</item>
+
+        <item name="android:textColor">?attr/colorAccent</item>
+
+        <item name="android:padding">14dp</item>
+
+        <item name="rippleColor">?attr/colorAccent</item>
     </style>
 </resources>
