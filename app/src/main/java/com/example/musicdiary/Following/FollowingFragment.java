@@ -46,7 +46,7 @@ public class FollowingFragment extends Fragment {
                             tab.setText("Friends");
                             break;
                         case 1:
-                            tab.setText("Search friends");
+                            tab.setText("Search for users");
                             break;
                          case 2:
                             tab.setText("Follower");

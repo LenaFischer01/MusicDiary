@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +29,7 @@ public class FollowerFragment extends Fragment {
 
     FollowerRecyclerViewAdapter adapter;
     List<UserInfo> follower = new ArrayList<>();
+    TextView noFollower;
 
     /**
      * Default constructor.
@@ -51,6 +53,8 @@ public class FollowerFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new FollowerRecyclerViewAdapter(follower);
 
+        noFollower = view.findViewById(R.id.noFollowerTextView);
+
         recyclerView.setAdapter(adapter);
 
         return view;
@@ -68,9 +72,18 @@ public class FollowerFragment extends Fragment {
                             }
                         }
                         adapter.notifyDataSetChanged();
+
+                        if (follower.isEmpty()){
+                            noFollower.setVisibility(View.VISIBLE);
+                        }
+                        else {
+                            noFollower.setVisibility(View.GONE);
+                        }
                     }
                 }
         );
+
+
 
     }
 
