@@ -35,7 +35,7 @@ public class FollowerRecyclerViewAdapter extends RecyclerView.Adapter<FollowerRe
     public void onBindViewHolder(@NonNull EntryViewHolder holder, int position) {
         UserInfo item = follower.get(position);
 
-        holder.followername.setText("> "+item.getUsername());
+        holder.followername.setText(item.getUsername());
     }
 
     @Override

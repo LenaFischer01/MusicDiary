@@ -216,6 +216,22 @@ public class DatabaseConnectorFirebase {
         databaseReference.child("Users").child(userID).removeValue();
         databaseReference.child("Posts").child(userID).removeValue();
         databaseReference.child("Friends").child(userID).removeValue();
+
+        databaseReference.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                    DataSnapshot followerSnapshot = userSnapshot.child("Follower").child(userID);
+                    if (followerSnapshot.exists()) {
+                        followerSnapshot.getRef().removeValue();
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Ah ja, Fehlerbehandlung. Wie man es halt macht...
+            }
+        });
     }
 
     // ========================== POST SETTERS / GETTERS / DELETERS ==========================

@@ -68,6 +68,18 @@ public class LoginActivity extends AppCompatActivity {
     private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
         IdpResponse response = result.getIdpResponse();
         if (result.getResultCode() == RESULT_OK) {
+
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                String uid = user.getUid();
+                String name = user.getDisplayName();
+
+                if (name != null && !name.trim().isEmpty()) {
+                    DatabaseConnectorFirebase db = new DatabaseConnectorFirebase();
+                    db.renameUser(uid, name);
+                }
+            }
+
             // Successfully signed in, start main activity
             startActivity(new Intent(this, MainActivity.class));
             finish();
