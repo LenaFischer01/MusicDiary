@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                             tab.setText("Feed");
                             break;
                         case 1:
-                            tab.setText("Friends");
+                            tab.setText("Follower");
                             break;
                         case 2:
                             tab.setText("Settings");
