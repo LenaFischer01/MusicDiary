@@ -105,7 +105,7 @@ public class FollowingOverviewFragment extends Fragment implements StopFollowing
         DatabaseConnectorFirebase databaseConnectorFirebase = new DatabaseConnectorFirebase();
         databaseConnectorFirebase.removeFriend(UID, friendUserId);
         adapter.removeItem(position);
-        Toast.makeText(getContext(), "Removed friend", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), "Stop following", Toast.LENGTH_SHORT).show();
         if (friendsList.isEmpty()) {
             noFriends.setVisibility(View.VISIBLE);
         }

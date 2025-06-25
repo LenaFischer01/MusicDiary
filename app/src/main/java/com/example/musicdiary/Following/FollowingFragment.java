@@ -43,7 +43,7 @@ public class FollowingFragment extends Fragment {
                 (tab, position) -> {
                     switch (position) {
                         case 0:
-                            tab.setText("Friends");
+                            tab.setText("Following");
                             break;
                         case 1:
                             tab.setText("Search for users");
