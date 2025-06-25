@@ -42,7 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/removeFriendButton"
-        android:text="remove friend"
+        android:text="stop following"
         android:textSize="14dp"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
